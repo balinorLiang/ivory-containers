@@ -9,13 +9,13 @@ ARG DFSET
 ARG PACKAGER
 ARG PG_LBL
 
-MAINTAINER Crunchy Data <info@crunchydata.com>
+MAINTAINER Highgo <support@highgo.com>
 
-LABEL vendor="Crunchy Data" \
-	url="https://crunchydata.com" \
+LABEL vendor="Highgo" \
+	url="https://www.highgo.com/" \
 	release="${RELVER}" \
-	org.opencontainers.image.vendor="Crunchy Data" \
-	os.version="7.7"
+	org.opencontainers.image.vendor="Highgo" \
+	os.version="7.9"
 
 COPY redhat/atomic/help.1 /help.1
 COPY redhat/atomic/help.md /help.md
@@ -41,6 +41,13 @@ ENV LC_ALL en_US.utf-8
 ENV LANG en_US.utf-8
 
 ARG EPEL8_RPM=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+ARG EPEL7_RPM=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+RUN sed -e "s|^mirrorlist=|#mirrorlist=|g" \
+         -e "s|^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever|baseurl=http://mirrors.tuna.tsinghua.edu.cn/centos-vault/8.4.2105|g" \
+         -i.bak \
+         /etc/yum.repos.d/CentOS-*.repo \
+	&& yum makecache
 
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
         rpm -ivh ${EPEL8_RPM} \
@@ -54,6 +61,20 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
                 vim-minimal \
         && ${PACKAGER} reinstall tzdata -y --nodocs \
         && sed -i 's/enabled=1/enabled=0/' /etc/yum.repos.d/epel*.repo \
+        && ${PACKAGER} -y clean all ; \
+fi
+
+RUN if [ "$BASEOS" = "centos7" ] ; then \
+        ${PACKAGER} -y update \
+        && ${PACKAGER} -y install \
+                epel-release \
+                --setopt=skip_missing_names_on_install=False \
+#                glibc-langpack-en \
+                bind-utils \
+                gettext \
+                hostname \
+                procps-ng \
+                nss_wrapper \
         && ${PACKAGER} -y clean all ; \
 fi
 
@@ -72,17 +93,20 @@ RUN if [ "$BASEOS" = "centos8" ] ; then \
 	&& ${PACKAGER} -y clean all ; \
 fi
 
-# Crunchy Postgres repo GPG Keys
-# Both keys are added to support building all PG versions
-# of this container. PG 11+ requires RPM-GPG-KEY-crunchydata
-# PG 9.5, 9.6 and 10 require CRUNCHY-GPG-KEY.public on RHEL machines
-ADD conf/*KEY* /
+#ADD rpms/nss_wrapper-1.1.3-1.el7.x86_64.rpm /
+#RUN rpm -ivh nss_wrapper-1.1.3-1.el7.x86_64.rpm \
+#        && rm -f nss_wrapper-1.1.3-1.el7.x86_64.rpm
+# Add IvorySQL yum repository
+ADD rpms/ivorysql_repo.rpm /
 
-# Add any available Crunchy PG repo files
-ADD conf/crunchypg${PG_LBL}.repo /etc/yum.repos.d/
-# Import both keys to support all required repos
-RUN rpm --import *GPG-KEY-crunchydata*
-RUN if [ "$DFSET" = "rhel" ] ; then rpm --import CRUNCHY-GPG-KEY.public ; fi
+# Add PG repo files
+# Install repos
+RUN rpm -ivh ivorysql_repo.rpm \
+	&& rm -f ivorysql_repo.rpm
+
+RUN if [ "$BASEOS" = "centos7" ] ; then \
+        ${PACKAGER} -qy module disable postgresql ; \
+fi
 
 RUN if [ "$BASEOS" = "centos8" ] ; then \
 	${PACKAGER} -qy module disable postgresql ; \

@@ -5,15 +5,15 @@ endif
 # Default values if not already set
 CCP_BASEOS ?= ubi8
 BASE_IMAGE_OS ?= $(CCP_BASEOS)
-CCP_IMAGE_PREFIX ?= crunchydata
+CCP_IMAGE_PREFIX ?= highgo
 CCP_PGVERSION ?= 15
 CCP_PG_FULLVERSION ?= 15.2
-CCP_PATRONI_VERSION ?= 2.1.7
-CCP_BACKREST_VERSION ?= 2.41
+CCP_PATRONI_VERSION ?= 2.1.4
+CCP_BACKREST_VERSION ?= 2.43
 CCP_VERSION ?= 5.3.1
 CCP_POSTGIS_VERSION ?= 3.3
 CCP_POSTGIS_FULL_VERSION ?= 3.3.2
-CCP_PGADMIN_VERSION ?= 4.30
+CCP_PGADMIN_VERSION ?= 7.4
 CCP_PGBOUNCER_VERSION ?= 1.18.0
 CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_VERSION)
 CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
@@ -23,7 +23,7 @@ PACKAGER ?= yum
 IMGBUILDER ?= buildah
 # Determines whether or not images should be pushed to the local docker daemon when building with
 # a tool other than docker (e.g. when building with buildah)
-IMG_PUSH_TO_DOCKER_DAEMON ?= true
+IMG_PUSH_TO_DOCKER_DAEMON ?= true 
 # The utility to use when pushing/pulling to and from an image repo (e.g. docker or buildah)
 IMG_PUSHER_PULLER ?= docker
 # Defines the sudo command that should be prepended to various build commands when rootless builds are
@@ -50,6 +50,12 @@ ifeq ("$(CCP_BASEOS)", "ubi8")
         DFSET=rhel
         PACKAGER=microdnf
         BASE_IMAGE_OS=ubi8-minimal
+endif
+
+ifeq ("$(CCP_BASEOS)", "centos7")
+        DFSET=centos
+        PACKAGER=dnf
+        DOCKERBASEREGISTRY=docker.io/centos:
 endif
 
 ifeq ("$(CCP_BASEOS)", "centos8")
@@ -87,12 +93,14 @@ pgbackrest-images: pgbackrest
 #===========================================
 
 pgadmin4: pgadmin4-img-$(IMGBUILDER)
+pgexporter: pgexporter-img-$(IMGBUILDER)
 pgbackrest: pgbackrest-pgimg-$(IMGBUILDER)
 pgbadger: pgbadger-img-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
 pgpool: pgpool-img-$(IMGBUILDER)
 postgres: postgres-pgimg-$(IMGBUILDER)
 postgres-gis: postgres-gis-pgimg-$(IMGBUILDER)
+pgexporter: pgexporter-img-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
@@ -106,8 +114,9 @@ ccbase-image: ccbase-image-$(IMGBUILDER)
 
 ccbase-image-build: build-pgbackrest license $(CCPROOT)/build/base/Dockerfile
 	$(IMGCMDSTEM) \
+		--network=host \
 		-f $(CCPROOT)/build/base/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-base:$(CCP_IMAGE_TAG) \
+		-t highgo-base:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg RELVER=$(CCP_VERSION) \
 		--build-arg DFSET=$(DFSET) \
@@ -128,8 +137,9 @@ ccbase-image-docker: ccbase-image-build
 # ----- Base Image Ext -----
 ccbase-ext-image-build: ccbase-image $(CCPROOT)/build/base-ext/Dockerfile
 	$(IMGCMDSTEM) \
+                --network=host \
 		-f $(CCPROOT)/build/base-ext/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-base-ext:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/highgo-base-ext:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
@@ -147,20 +157,22 @@ ccbase-ext-image-docker: ccbase-ext-image-build
 
 # ----- Special case pg-based image (postgres) -----
 # Special case args: BACKREST_VER
-postgres-pgimg-build: ccbase-image $(CCPROOT)/build/postgres/Dockerfile
+postgres-pgimg-build: ccbase-image $(CCPROOT)/build/ivory/Dockerfile
 	$(IMGCMDSTEM) \
-		-f $(CCPROOT)/build/postgres/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-postgres:$(CCP_IMAGE_TAG) \
+		--network=host \
+		-f $(CCPROOT)/build/ivory/Dockerfile \
+		-t $(CCP_IMAGE_PREFIX)/highgo-ivory:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
 		--build-arg PG_LBL=${subst .,,$(CCP_PGVERSION)} \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
+		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
 		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
-		--build-arg BASE_IMAGE_NAME=crunchy-base \
+		--build-arg BASE_IMAGE_NAME=highgo-base \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		$(CCPROOT)
 
@@ -176,8 +188,9 @@ postgres-pgimg-docker: postgres-pgimg-build
 # Used as the base for the postgres-gis image.
 postgres-gis-base-pgimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres/Dockerfile
 	$(IMGCMDSTEM) \
-		-f $(CCPROOT)/build/postgres/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-postgres-gis-base:$(CCP_IMAGE_TAG) \
+		--network=host \
+		-f $(CCPROOT)/build/ivory/Dockerfile \
+		-t $(CCP_IMAGE_PREFIX)/highgo-postgres-gis-base:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
@@ -188,7 +201,8 @@ postgres-gis-base-pgimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres/
 		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
-		--build-arg BASE_IMAGE_NAME=crunchy-base-ext \
+		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
+		--build-arg BASE_IMAGE_NAME=highgo-base-ext \
 		$(CCPROOT)
 
 postgres-gis-base-pgimg-buildah: postgres-gis-base-pgimg-build ;
@@ -201,8 +215,9 @@ endif
 # Special case args: POSTGIS_LBL
 postgres-gis-pgimg-build: postgres-gis-base-pgimg-build $(CCPROOT)/build/postgres-gis/Dockerfile
 	$(IMGCMDSTEM) \
+		--network=host \
 		-f $(CCPROOT)/build/postgres-gis/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/highgo-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
@@ -232,7 +247,7 @@ build-pgbackrest:
 pgbackrest-pgimg-build: ccbase-image build-pgbackrest $(CCPROOT)/build/pgbackrest/Dockerfile
 	$(IMGCMDSTEM) \
 		-f $(CCPROOT)/build/pgbackrest/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-pgbackrest:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/highgo-pgbackrest:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
@@ -276,11 +291,25 @@ endif
 
 upgrade-img-docker: upgrade-img-build
 
+pgexporter-img-build: ccbase-image $(CCPROOT)/build/pgexporter/Dockerfile
+	$(IMGCMDSTEM) \
+		--network=host \
+		-f $(CCPROOT)/build/pgexporter/Dockerfile \
+		-t $(CCP_IMAGE_PREFIX)/highgo-pgexporter:$(CCP_IMAGE_TAG) \
+		--build-arg BASEOS=$(CCP_BASEOS) \
+		--build-arg BASEVER=$(CCP_VERSION) \
+		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
+		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
+		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
+		--build-arg PGADMIN_VER=$(CCP_PGADMIN_VERSION) \
+		$(CCPROOT)
+
 # Special case args: CCP_PGADMIN_VERSION
 pgadmin4-img-build: ccbase-image $(CCPROOT)/build/pgadmin4/Dockerfile
 	$(IMGCMDSTEM) \
+		--network=host \
 		-f $(CCPROOT)/build/pgadmin4/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-pgadmin4:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/highgo-pgadmin4:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
@@ -288,15 +317,16 @@ pgadmin4-img-build: ccbase-image $(CCPROOT)/build/pgadmin4/Dockerfile
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PGADMIN_VER=$(CCP_PGADMIN_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
+                --build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		$(CCPROOT)
 
-pgadmin4-img-buildah: pgadmin4-img-build ;
+pgadmin-img-buildah: pgadmin4-img-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
 	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-pgadmin4:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-pgadmin4:$(CCP_IMAGE_TAG)
 endif
 
-pgadmin4-img-docker: pgadmin-img-build
+pgadmin-img-docker: pgadmin-img-build
 
 # Special case args: CCP_PGBOUNCER_VERSION
 pgbouncer-img-build: ccbase-image $(CCPROOT)/build/pgbouncer/Dockerfile
