@@ -2,7 +2,7 @@ ARG BASEOS
 ARG BASEVER
 ARG PG_FULL
 ARG PREFIX
-FROM ${PREFIX}/crunchy-base:${BASEOS}-${PG_FULL}-${BASEVER}
+FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER}
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG DFSET
@@ -11,12 +11,17 @@ ARG PACKAGER
 ARG PG_MAJOR
 ARG PGBOUNCER_VER
 
+RUN ${PACKAGER} -y update epel-release \
+	&& ${PACKAGER} -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
+#	&& ${PACKAGER} -y clean all
+	&& ${PACKAGER} -y makecache
+
 LABEL name="pgbouncer" \
-	summary="Lightweight connection pooler for crunchy-postgres" \
-	description="The aim of crunchy-pgbouncer is to lower the performance impact of opening new connections to PostgreSQL; clients connect through this service. It offers session, transaction and statement pooling." \
+	summary="Lightweight connection pooler for ivory" \
+	description="The aim of pgbouncer is to lower the performance impact of opening new connections to PostgreSQL; clients connect through this service. It offers session, transaction and statement pooling." \
 	io.k8s.description="pgBouncer" \
 	io.k8s.display-name="pgBouncer" \
-	io.openshift.tags="postgresql,postgres,pooling,pgbouncer,database,crunchy"
+	io.openshift.tags="postgresql,postgres,pooling,pgbouncer,database,ivory,ivorysql"
 
 RUN ${PACKAGER} -y install --nodocs \
 	--disablerepo="epel" \
