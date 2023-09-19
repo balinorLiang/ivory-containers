@@ -104,7 +104,6 @@ pgbouncer: pgbouncer-img-$(IMGBUILDER)
 pgpool: pgpool-img-$(IMGBUILDER)
 postgres: postgres-pgimg-$(IMGBUILDER)
 postgres-gis: postgres-gis-pgimg-$(IMGBUILDER)
-pgexporter: pgexporter-img-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
@@ -176,7 +175,7 @@ postgres-pgimg-build: ccbase-image $(CCPROOT)/build/ivory/Dockerfile_multi
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
 		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
-		--build-arg BASE_IMAGE_NAME=highgo-base \
+		--build-arg BASE_IMAGE_NAME=$(CCP_IMAGE_PREFIX)/highgo-base \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		$(CCPROOT)
 
@@ -259,6 +258,7 @@ pgbackrest-pgimg-build: ccbase-image build-pgbackrest $(CCPROOT)/build/pgbackres
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
+		--build-arg BASE_IMAGE_NAME=$(CCP_IMAGE_PREFIX)/highgo-base \
 		$(CCPROOT)
 
 pgbackrest-pgimg-buildah: pgbackrest-pgimg-build ;
@@ -306,6 +306,7 @@ pgexporter-img-build: ccbase-image $(CCPROOT)/build/pgexporter/Dockerfile
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PGADMIN_VER=$(CCP_PGADMIN_VERSION) \
+		--build-arg BASE_IMAGE_NAME=$(CCP_IMAGE_PREFIX)/highgo-base \
 		$(CCPROOT)
 
 # Special case args: CCP_PGADMIN_VERSION
@@ -321,6 +322,7 @@ pgadmin4-img-build: ccbase-image $(CCPROOT)/build/pgadmin4/Dockerfile
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PGADMIN_VER=$(CCP_PGADMIN_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
+		--build-arg BASE_IMAGE_NAME=$(CCP_IMAGE_PREFIX)/highgo-base \
                 --build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		$(CCPROOT)
 
@@ -345,6 +347,7 @@ pgbouncer-img-build: ccbase-image $(CCPROOT)/build/pgbouncer/Dockerfile
 		--build-arg PGBOUNCER_VER=$(CCP_PGBOUNCER_VERSION) \
 		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
+		--build-arg BASE_IMAGE_NAME=$(CCP_IMAGE_PREFIX)/highgo-base \
 		$(CCPROOT)
 
 pgbouncer-img-buildah: pgbouncer-img-build ;

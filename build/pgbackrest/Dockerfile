@@ -2,7 +2,8 @@ ARG BASEOS
 ARG BASEVER
 ARG PG_FULL
 ARG PREFIX
-FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER}
+ARG BASE_IMAGE_NAME
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${PG_FULL}-${BASEVER}
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG PACKAGER

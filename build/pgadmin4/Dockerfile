@@ -2,10 +2,11 @@ ARG BASEOS
 ARG BASEVER
 ARG PG_FULL
 ARG PREFIX
+ARG BASE_IMAGE_NAME
 #***************************************************
 # Create env builder
 #***************************************************
-FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER} as pg15-builder
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${PG_FULL}-${BASEVER} as pg15-builder
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG BASEOS
@@ -23,7 +24,7 @@ RUN ${PACKAGER} -y install --nodocs \
 #***************************************************
 # Create pgadmin builder
 #***************************************************
-FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER}  as pgadmin-builder
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${PG_FULL}-${BASEVER}  as pgadmin-builder
 
 ARG BASEOS
 ARG PACKAGER
