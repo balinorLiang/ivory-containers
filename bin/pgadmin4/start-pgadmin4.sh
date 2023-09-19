@@ -18,7 +18,6 @@ source "${CRUNCHY_DIR}/bin/common_lib.sh"
 enable_debugging
 
 export PATH=$PATH:/usr/pgsql-*/bin
-PGADMIN_DIR=/usr/lib/python3.6/site-packages/pgadmin4-web
 APACHE_PIDFILE='/tmp/httpd.pid'
 
 function trap_sigterm() {
@@ -58,7 +57,9 @@ sed -i "s|SERVER_PORT|${SERVER_PORT:-5050}|g" /var/lib/pgadmin/pgadmin.conf
 sed -i "s/^DEFAULT_SERVER_PORT.*/DEFAULT_SERVER_PORT = ${SERVER_PORT:-5050}/" /var/lib/pgadmin/config_local.py
 sed -i "s|\"pg\":.*|\"pg\": \"/usr/pgsql-${PGVERSION?}/bin\",|g" /var/lib/pgadmin/config_local.py
 
-cd ${PGADMIN_DIR?}
+echo_info "cd into pgadmin4-web"
+
+cd /usr/lib/python3.9/site-packages/pgadmin4-web
 
 if [[ ! -f /var/lib/pgadmin/pgadmin4.db ]]
 then
@@ -67,10 +68,8 @@ then
     err_check "$?" "pgAdmin4 Database Setup" "Could not create pgAdmin4 database: \n$(cat /tmp/pgadmin4.stderr)"
 fi
 
-cd ${PGADMIN_DIR?}
+cd /usr/lib/python3.9/site-packages/pgadmin4-web
 
 echo_info "Starting Apache web server.."
-/usr/sbin/httpd -D FOREGROUND &
-echo $! > $APACHE_PIDFILE
 
 wait
