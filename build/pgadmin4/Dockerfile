@@ -84,6 +84,12 @@ RUN sed -e "s|^mirrorlist=|#mirrorlist=|g" \
          /etc/yum.repos.d/ubi.repo \
 	&& yum makecache
 
+# solve circle import for issue
+RUN sed -i 's/config.CONFIG_DATABASE_CONNECTION_POOL_SIZE/5/g' \
+        -i 's/config.CONFIG_DATABASE_CONNECTION_MAX_OVERFLOW/100/g' \
+        -i 's/import config//g' \
+        /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/model/__init__.py
+
 RUN ${PACKAGER} -y install --nodocs \
                 mod_ssl \
                 python3-gssapi \
