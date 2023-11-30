@@ -5,7 +5,7 @@ ARG PREFIX
 #***************************************************
 # Create env builder
 #***************************************************
-FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER} as pg15-builder
+FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER} as pg16-builder
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG BASEOS
@@ -35,7 +35,7 @@ RUN mkdir -p /var/lib/pgadmin
 RUN rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-2-1.noarch.rpm 
 RUN ${PACKAGER} -y install --nodocs \
                 --setopt=skip_missing_names_on_install=False \
-                --setopt=obsoletes=0 pgadmin4-web-7.4 
+                --setopt=obsoletes=0 pgadmin4-web-8.0
 
 RUN cp -rf /usr/pgadmin4/venv/lib/python3.9/site-packages/* /usr/lib/python3.9/site-packages/ \
     && cp -rp /usr/pgadmin4/web /usr/lib/python3.9/site-packages/pgadmin4-web
@@ -51,11 +51,11 @@ ARG PG_MAJOR
 ARG PGADMIN_VER
 ARG IVY_MAJOR
 
-COPY --from=pg15-builder /usr/pgsql-15/bin/pg_dump /usr/bin/pg_dump
-COPY --from=pg15-builder /usr/pgsql-15/bin/pg_dumpall /usr/bin/pg_dumpall
-COPY --from=pg15-builder /usr/pgsql-15/bin/pg_restore /usr/bin/pg_restore
-COPY --from=pg15-builder /usr/pgsql-15/bin/psql /usr/bin/psql
-COPY --from=pg15-builder /usr/lib64/libpq.so.5.13 /usr/lib64
+COPY --from=pg16-builder /usr/pgsql-15/bin/pg_dump /usr/bin/pg_dump
+COPY --from=pg16-builder /usr/pgsql-15/bin/pg_dumpall /usr/bin/pg_dumpall
+COPY --from=pg16-builder /usr/pgsql-15/bin/pg_restore /usr/bin/pg_restore
+COPY --from=pg16-builder /usr/pgsql-15/bin/psql /usr/bin/psql
+COPY --from=pg16-builder /usr/lib64/libpq.so.5.13 /usr/lib64
 
 COPY --from=pgadmin-builder /usr/lib/python3.9 /usr/lib/python3.9
 COPY --from=pgadmin-builder /usr/bin/python3.9 /usr/bin/python3.9
@@ -83,6 +83,12 @@ RUN sed -e "s|^mirrorlist=|#mirrorlist=|g" \
          -i.bak \
          /etc/yum.repos.d/ubi.repo \
 	&& yum makecache
+
+# solve circle import for issue
+RUN sed -i 's/config.CONFIG_DATABASE_CONNECTION_POOL_SIZE/5/g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/model/__init__.py && \
+    sed -i 's/config.CONFIG_DATABASE_CONNECTION_MAX_OVERFLOW/100/g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/model/__init__.py && \
+    sed -i 's/import config//g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/model/__init__.py
+
 
 RUN ${PACKAGER} -y install --nodocs \
                 mod_ssl \

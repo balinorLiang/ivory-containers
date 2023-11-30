@@ -120,7 +120,7 @@ ccbase-image-build: build-pgbackrest license $(CCPROOT)/build/base/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/base/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/highgo-base:$(CCP_IMAGE_TAG) \
+		-t highgo-base:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg RELVER=$(CCP_VERSION) \
 		--build-arg DFSET=$(DFSET) \
@@ -143,7 +143,7 @@ ccbase-ext-image-build: ccbase-image $(CCPROOT)/build/base-ext/Dockerfile
 	$(IMGCMDSTEM) \
                 --network=host \
 		-f $(CCPROOT)/build/base-ext/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/highgo-base-ext:$(CCP_IMAGE_TAG) \
+		-t highgo-base-ext:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
