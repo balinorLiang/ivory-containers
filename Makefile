@@ -5,14 +5,15 @@ endif
 # Default values if not already set
 CCP_BASEOS ?= ubi8
 BASE_IMAGE_OS ?= $(CCP_BASEOS)
+#BASE_IMAGE_OS ?= rockylinux/rockylinux:8-ubi
 CCP_IMAGE_PREFIX ?= highgo
 CCP_PGVERSION ?= 15
 CCP_PG_FULLVERSION ?= 15.2
 CCP_PATRONI_VERSION ?= 2.1.4
-CCP_BACKREST_VERSION ?= 2.43
+CCP_BACKREST_VERSION ?= 2.47
 CCP_VERSION ?= 5.3.1
-CCP_POSTGIS_VERSION ?= 3.3
-CCP_POSTGIS_FULL_VERSION ?= 3.3.2
+CCP_POSTGIS_VERSION ?= 3.4
+CCP_POSTGIS_FULL_VERSION ?= 3.4.2
 CCP_PGADMIN_VERSION ?= 7.4
 CCP_PGBOUNCER_VERSION ?= 1.18.0
 CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_VERSION)
@@ -206,7 +207,7 @@ postgres-gis-base-pgimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres/
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
-		--build-arg BASE_IMAGE_NAME=highgo-base-ext \
+		--build-arg BASE_IMAGE_NAME=highgo/highgo-base-ext \
 		$(CCPROOT)
 
 postgres-gis-base-pgimg-buildah: postgres-gis-base-pgimg-build ;

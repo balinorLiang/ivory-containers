@@ -16,72 +16,53 @@ ARG PG_MAJOR
 ARG IVY_MAJOR
 
 RUN  ${PACKAGER} -y install \
-#		lz4 \
-#		libicu \
-#		libxml2 \
-#		libxslt \
-#		tcl \
-#                ivorysql2-contrib \
-                ivorysql2-devel \
-#                ivorysql2-server \
-#                ivorysql2-plpython3 \
-#                ivorysql2-pltcl \
-#                ivorysql2-plperl \
-        redhat-rpm-config \
-        openssl-devel \
-        make \
-        && ${PACKAGER} -y clean all
+	ivorysql3-devel-3.0 \
+	redhat-rpm-config \
+	openssl-devel \
+	make \
+	&& ${PACKAGER} -y clean all
 RUN dnf install -y libxslt tcl
-RUN dnf install -y ivorysql2-server-2.3 \
-	ivorysql2-contrib-2.3 \
-	ivorysql2-plperl-2.3 \
-	ivorysql2-plpython3-2.3 \
-	ivorysql2-pltcl-2.3
+RUN dnf install -y ivorysql3-server-3.0 \
+	ivorysql3-contrib-3.0 \
+	ivorysql3-plperl-3.0 \
+	ivorysql3-plpython3-3.0 \
+	ivorysql3-pltcl-3.0
  
-#ADD resource/*.rpm /
-#RUN rpm -ivh ivorysql2-libs-2.3-1.rhel8.x86_64.rpm \
-#	&& rpm -ivh ivorysql2-2.3-1.rhel8.x86_64.rpm \
-#RUN rpm -ivh ivorysql2-server-2.3-1.rhel8.x86_64.rpm --nodeps \
-#	&& rpm -ivh ivorysql2-contrib-2.3-1.rhel8.x86_64.rpm \
-#	&& rpm -ivh ivorysql2-devel-2.3-1.rhel8.x86_64.rpm \
-#	&& rpm -ivh ivorysql2-plperl-2.3-1.rhel8.x86_64.rpm \
-#	&& rpm -ivh ivorysql2-plpython3-2.3-1.rhel8.x86_64.rpm \
-#	&& rpm -ivh ivorysql2-pltcl-2.3-1.rhel8.x86_64.rpm
-
 ENV IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
 ENV PATH="${IVYROOT}/bin:${PATH}"
 
 # insatll pgaudit
-ADD rpms/pgaudit-1.7.0.tar.gz /
-RUN cd pgaudit-1.7.0 \
+ADD resource/pgaudit-16.0.tar.gz /
+RUN cd pgaudit-16.0 \
         && make install USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
-        && rm -rf ../pgaudit-1.7.0
+        && rm -rf ../pgaudit-16.0
 # insatll pg_cron
-#RUN yum install -y pg_cron_15 --installroot=$IVYROOT  --releasever=8 --skip-broken
-ADD rpms/pg_cron-main.tar.gz /
-RUN cd pg_cron-main \
+ADD resource/pg_cron-1.6.2.tar.gz /
+RUN cd pg_cron-1.6.2 \
         && make USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
         && make install USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
-        && rm -rf ../pg_cron-main/
+        && rm -rf ../pg_cron-1.6.2
 # install timescaledb
-ADD rpms/timescaledb-2.11.1.tar.gz /
-RUN cd timescaledb-2.11.1 \
-        && ./bootstrap \
-        && cd build \
-        && make PG_CONFIG=$IVYROOT/bin/pg_config \
-        && make install PG_CONFIG=$IVYROOT/bin/pg_config
+#ADD resource/timescaledb-2.12.2.tar.gz /
+#RUN cd timescaledb-2.12.2 \
+#        && ./bootstrap \
+#        && cd build \
+#        && make PG_CONFIG=$IVYROOT/bin/pg_config \
+#        && make install PG_CONFIG=$IVYROOT/bin/pg_config \
+#	&& rm -rf ../timescaledb-2.12.2
 # install wal2json
-ADD rpms/wal2json_2_5.tar.gz /
+ADD resource/wal2json_2_5.tar.gz /
 RUN cd wal2json-wal2json_2_5 \
-    && export PATH=$IVYROOT/bin:$PATH \
-    && make \
-    && make install \
-    && rm -rf ../wal2json-wal2json_2_5
+	&& export PATH=$IVYROOT/bin:$PATH \
+	&& make \
+	&& make install \
+	&& rm -rf ../wal2json-wal2json_2_5
 # install pgnodemx
-ADD rpms/pgnodemx-1.5.tar.gz /
-RUN cd pgnodemx-1.5 \
-    && make USE_PGXS=1 \
-    && make USE_PGXS=1 install
+ADD resource/pgnodemx-1.6.tar.gz /
+RUN cd pgnodemx-1.6 \
+	&& make USE_PGXS=1 \
+	&& make USE_PGXS=1 install \
+	&& rm -rf ../pgnodemx-1.6
 
 ###################################################################################################
 FROM ${BASE_IMAGE_NAME}:${BASEOS}-${PG_FULL}-${BASEVER}
@@ -115,7 +96,7 @@ RUN ${PACKAGER} -y install \
 		tcl \
                 openssh-clients \
                 openssh-server \
-                pgbackrest-2.45 \
+		pgbackrest-${BACKREST_VER} \
                 psmisc \
                 python3-pip \
                 python3-psutil \

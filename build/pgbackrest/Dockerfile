@@ -21,17 +21,17 @@ LABEL name="pgbackrest" \
 
 # Run postgres install in separate transaction ahead of backrest for postgres user
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
-	${PACKAGER} -y install --nodocs \
+	${PACKAGER} -y install --nodocs --enablerepo="epel" \
 		openssh-clients \
 		openssh-server \
 		shadow-utils \
 		tar \
 		bzip2 \
 		lz4 \
-		crunchy-backrest-${BACKREST_VER} \
+		pgbackrest-${BACKREST_VER} \
 		&& ${PACKAGER} -y clean all ; \
 else \
-	${PACKAGER} -y install --nodocs  \
+	${PACKAGER} -y install --nodocs  --enablerepo="epel" \
 		--setopt=skip_missing_names_on_install=False \
 		openssh-clients \
 		openssh-server \

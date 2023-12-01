@@ -117,8 +117,8 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install which libtool libxml2-devel redhat-rpm-config clang llvm; \
 fi
 
-ADD build/postgres-gis/postgis-3.2.5.tar.gz /
-RUN cd postgis-3.2.5 \
+ADD build/postgres-gis/postgis-3.4.0.tar.gz /
+RUN cd postgis-3.4.0 \
         && export PROTOBUFC_HOME=/usr/local/protobuf-c-1.4.1 \
         && export PATH=$PROTOBUF_HOME/bin:$PROTOBUFC_HOME/bin:$PATH \
         && export PKG_CONFIG_PATH=$PROTOBUFC_HOME/lib:$PKG_CONFIG_PATH \
@@ -149,17 +149,17 @@ fi
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
         ${PACKAGER} install -y geos311 libtiff  && ${PACKAGER} -y clean all ; \
 fi
-RUN rm -rf /usr/local/ivorysql/ivorysql-2
+RUN rm -rf /usr/local/ivorysql/ivorysql-3
 COPY --from=step1 /usr/local/proj-8.2.1/lib/*.so /usr/local/proj-8.2.1/lib/
 COPY --from=step1 /usr/local/gdal-3.4.3/lib/*.so /usr/local/gdal-3.4.3/lib/
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/bin/pgsql2shp /usr/local/ivorysql/ivorysql-2/bin/pgsql2shp 
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/bin/raster2pgsql /usr/local/ivorysql/ivorysql-2/bin/raster2pgsql 
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/bin/shp2pgsql /usr/local/ivorysql/ivorysql-2/bin/shp2pgsql 
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/lib/bitcode /usr/local/ivorysql/ivorysql-2/lib/bitcode
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/lib/postgis* /usr/local/ivorysql/ivorysql-2/lib/
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/share/extension/postgis* /usr/local/ivorysql/ivorysql-2/share/extension/
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-2/share/contrib/postgis-3.2 /usr/local/ivorysql/ivorysql-2/share/contrib/postgis-3.2
-COPY --from=step1 /usr/local/ivorysql/ivorysql-2 /usr/local/ivorysql/ivorysql-2
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/bin/pgsql2shp /usr/local/ivorysql/ivorysql-3/bin/pgsql2shp 
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/bin/raster2pgsql /usr/local/ivorysql/ivorysql-3/bin/raster2pgsql 
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/bin/shp2pgsql /usr/local/ivorysql/ivorysql-3/bin/shp2pgsql 
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/lib/bitcode /usr/local/ivorysql/ivorysql-3/lib/bitcode
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/lib/postgis* /usr/local/ivorysql/ivorysql-3/lib/
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/share/extension/postgis* /usr/local/ivorysql/ivorysql-3/share/extension/
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/share/contrib/postgis-3.2 /usr/local/ivorysql/ivorysql-3/share/contrib/postgis-3.2
+COPY --from=step1 /usr/local/ivorysql/ivorysql-3 /usr/local/ivorysql/ivorysql-3
 
 RUN sed -i '$a\/usr/local/proj-8.2.1/lib' /etc/ld.so.conf \
 	&& sed -i '$a\/usr/local/gdal-3.4.3/lib' /etc/ld.so.conf \

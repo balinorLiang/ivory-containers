@@ -86,12 +86,12 @@ RUN if [ "$BASEOS" = "centos8" ] ; then \
 fi
 
 # Add IvorySQL yum repository
-ADD rpms/ivorysql_repo.rpm /
+ADD rpms/ivorysql-release-3.0-1.noarch.rpm /
 
 # Add PG repo files
 # Install repos
-RUN rpm -ivh ivorysql_repo.rpm \
-	&& rm -f ivorysql_repo.rpm
+RUN rpm -ivh ivorysql-release-3.0-1.noarch.rpm \
+	&& rm -f ivorysql-release-3.0-1.noarch.rpm
 
 RUN if [ "$BASEOS" = "centos8" ] ; then \
 	${PACKAGER} -qy module disable postgresql ; \
