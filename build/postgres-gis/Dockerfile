@@ -6,11 +6,7 @@ FROM ${PREFIX}/highgo-postgres-gis-base:${BASEOS}-${PG_FULL}-${BASEVER} as step1
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG BASEOS
-ARG DFSET
 ARG PACKAGER
-ARG PG_MAJOR
-ARG POSTGIS_LBL
-ARG POSTGIS_FULL_VER
 
 LABEL name="postgres-gis" \
 	summary="Includes PostGIS extensions on top of highgo-ivory" \
@@ -21,35 +17,6 @@ LABEL name="postgres-gis" \
 
 USER 0
 
-#RUN if [ "$BASEOS" = "centos8" ] ; then \
-#	${PACKAGER} -y install --nodocs \
-#		--setopt=skip_missing_names_on_install=False \
-#		--enablerepo="powertools" \
-#		pgrouting${POSTGIS_LBL}_${PG_MAJOR//.} \
-#		postgis${POSTGIS_LBL}_${PG_MAJOR//.}-${POSTGIS_FULL_VER} \
-#		postgis${POSTGIS_LBL}_${PG_MAJOR//.}-client-${POSTGIS_FULL_VER} \
-#		postgresql${PG_MAJOR//.}-plperl \
-#		postgresql${PG_MAJOR//.}-pltcl \
-#	&& ${PACKAGER} -y clean all ; \
-#fi
-#
-#RUN if [ "$BASEOS" = "ubi8" ] ; then \
-#	${PACKAGER} -y install --nodocs \
-#		--enablerepo="epel" \
-#		--enablerepo="codeready-builder-for-rhel-8-x86_64-rpms" \
-#		libaec libdap armadillo \
-#	&& ${PACKAGER} -y install --nodocs \
-#		--enablerepo="epel" \
-#		--enablerepo="codeready-builder-for-rhel-8-x86_64-rpms" \
-#		pgrouting${POSTGIS_LBL}_${PG_MAJOR//.} \
-#		postgis${POSTGIS_LBL}_${PG_MAJOR//.}-${POSTGIS_FULL_VER} \
-#		postgis${POSTGIS_LBL}_${PG_MAJOR//.}-client-${POSTGIS_FULL_VER} \
-#		postgresql${PG_MAJOR//.}-plperl \
-#		postgresql${PG_MAJOR//.}-pltcl \
-#	&& ${PACKAGER} -y clean all \
-#		--enablerepo="epel" \
-#		--enablerepo="codeready-builder-for-rhel-8-x86_64-rpms" ; \
-#fi
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install gcc gcc-c++; \
 fi
@@ -127,13 +94,13 @@ RUN cd postgis-3.4.0 \
 	&& make \
 	&& make install
 
+##############################################################################
+##### stage2
+##############################################################################
+
 FROM ${PREFIX}/highgo-postgres-gis-base:${BASEOS}-${PG_FULL}-${BASEVER}
 ARG BASEOS
-ARG DFSET
 ARG PACKAGER
-ARG PG_MAJOR
-ARG POSTGIS_LBL
-ARG POSTGIS_FULL_VER
 
 LABEL name="postgres-gis" \
         summary="Includes PostGIS extensions on top of highgo-ivory" \

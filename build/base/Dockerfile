@@ -1,3 +1,4 @@
+
 ARG BASE_IMAGE_OS
 ARG DOCKERBASEREGISTRY
 FROM ${DOCKERBASEREGISTRY}${BASE_IMAGE_OS}
@@ -5,9 +6,7 @@ FROM ${DOCKERBASEREGISTRY}${BASE_IMAGE_OS}
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG BASEOS
 ARG RELVER
-ARG DFSET
 ARG PACKAGER
-ARG PG_LBL
 
 MAINTAINER Highgo <support@highgo.com>
 
@@ -42,12 +41,6 @@ ENV LANG en_US.utf-8
 
 ARG EPEL8_RPM=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
-#RUN sed -e "s|^mirrorlist=|#mirrorlist=|g" \
-#         -e "s|^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever|baseurl=http://mirrors.tuna.tsinghua.edu.cn/centos-vault/8.4.2105|g" \
-#         -i.bak \
-#         /etc/yum.repos.d/CentOS-*.repo \
-#	&& yum makecache
-
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
         rpm -ivh ${EPEL8_RPM} \
         && ${PACKAGER} -y install --nodocs \
@@ -63,28 +56,6 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
         && ${PACKAGER} -y clean all ; \
 fi
 
-RUN if [ "$BASEOS" = "centos8" ] ; then \
-	sed -e "s|^mirrorlist=|#mirrorlist=|g" \
-	-e "s|^#baseurl=http://mirror.centos.org/\$contentdir/\$releasever|baseurl=http://mirrors.tuna.tsinghua.edu.cn/centos-vault/8.4.2105|g" \
-	-i.bak \
-	/etc/yum.repos.d/CentOS-*.repo \
-	&& yum makecache ; \
-fi
-RUN if [ "$BASEOS" = "centos8" ] ; then \
-	${PACKAGER} -y update --nodocs \
-	&& ${PACKAGER} -y install \
-		--setopt=skip_missing_names_on_install=False \
-		--nodocs \
-		epel-release \
-		glibc-langpack-en \
-		bind-utils \
-		gettext \
-		hostname \
-		procps-ng \
-		nss_wrapper \
-	&& ${PACKAGER} -y clean all ; \
-fi
-
 # Add IvorySQL yum repository
 ADD rpms/ivorysql-release-3.0-1.noarch.rpm /
 
@@ -92,8 +63,3 @@ ADD rpms/ivorysql-release-3.0-1.noarch.rpm /
 # Install repos
 RUN rpm -ivh ivorysql-release-3.0-1.noarch.rpm \
 	&& rm -f ivorysql-release-3.0-1.noarch.rpm
-
-RUN if [ "$BASEOS" = "centos8" ] ; then \
-	${PACKAGER} -qy module disable postgresql ; \
-fi
-
