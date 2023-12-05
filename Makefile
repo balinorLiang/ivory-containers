@@ -1,27 +1,29 @@
 ifndef CCPROOT
-	export CCPROOT=$(GOPATH)/src/github.com/crunchydata/crunchy-containers
+	export CCPROOT=$(GOPATH)/src/github.com/ivorysql/ivory-containers
 endif
 
 # Default values if not already set
 CCP_BASEOS ?= ubi8
 BASE_IMAGE_OS ?= $(CCP_BASEOS)
 #BASE_IMAGE_OS ?= rockylinux/rockylinux:8-ubi
-CCP_IMAGE_PREFIX ?= highgo
+CCP_IMAGE_PREFIX ?= ivorysql
 CCP_PGVERSION ?= 15
 CCP_PG_FULLVERSION ?= 15.2
 CCP_PATRONI_VERSION ?= 2.1.4
 CCP_BACKREST_VERSION ?= 2.47
-CCP_VERSION ?= 5.3.1
+CCP_VERSION ?= 1
 CCP_POSTGIS_VERSION ?= 3.4
 CCP_POSTGIS_FULL_VERSION ?= 3.4.2
-CCP_PGADMIN_VERSION ?= 7.4
-CCP_PGBOUNCER_VERSION ?= 1.18.0
+CCP_PGADMIN_VERSION ?= 8.0
+CCP_PGBOUNCER_VERSION ?= 1.21.0
+CCP_IVYO_VERSION ?= 2.0
+CCP_PGEXPORTER_VERSION ?= 0.15.0
 CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_VERSION)
 CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
 PACKAGER ?= yum
 
 # Valid values: buildah (default), docker
-IMGBUILDER ?= buildah
+IMGBUILDER ?= docker
 # Determines whether or not images should be pushed to the local docker daemon when building with
 # a tool other than docker (e.g. when building with buildah)
 IMG_PUSH_TO_DOCKER_DAEMON ?= true 
@@ -100,12 +102,9 @@ pgbackrest-images: pgbackrest
 pgadmin4: pgadmin4-img-$(IMGBUILDER)
 pgexporter: pgexporter-img-$(IMGBUILDER)
 pgbackrest: pgbackrest-pgimg-$(IMGBUILDER)
-pgbadger: pgbadger-img-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
-pgpool: pgpool-img-$(IMGBUILDER)
 postgres: postgres-pgimg-$(IMGBUILDER)
 postgres-gis: postgres-gis-pgimg-$(IMGBUILDER)
-pgexporter: pgexporter-img-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
@@ -296,33 +295,22 @@ endif
 
 upgrade-img-docker: upgrade-img-build
 
-pgexporter-img-build: ccbase-image $(CCPROOT)/build/pgexporter/Dockerfile
+pgexporter-img-build: $(CCPROOT)/build/pgexporter/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/pgexporter/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/highgo-pgexporter:$(CCP_IMAGE_TAG) \
-		--build-arg BASEOS=$(CCP_BASEOS) \
-		--build-arg BASEVER=$(CCP_VERSION) \
-		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
+		-t $(CCP_IMAGE_PREFIX)/postgres-exporter:$(CCP_BASEOS)-$(CCP_PGEXPORTER_VERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION) \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
-		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
-		--build-arg PGADMIN_VER=$(CCP_PGADMIN_VERSION) \
 		$(CCPROOT)
 
 # Special case args: CCP_PGADMIN_VERSION
-pgadmin4-img-build: ccbase-image $(CCPROOT)/build/pgadmin4/Dockerfile
+pgadmin4-img-build: $(CCPROOT)/build/pgadmin4/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/pgadmin4/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/highgo-pgadmin4:$(CCP_IMAGE_TAG) \
-		--build-arg BASEOS=$(CCP_BASEOS) \
-		--build-arg BASEVER=$(CCP_VERSION) \
-		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
+		-t $(CCP_IMAGE_PREFIX)/pgadmin:$(CCP_BASEOS)-$(CCP_PGADMIN_VERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION) \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
-		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
-		--build-arg PGADMIN_VER=$(CCP_PGADMIN_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
-                --build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		$(CCPROOT)
 
 pgadmin-img-buildah: pgadmin4-img-build ;
@@ -334,17 +322,12 @@ endif
 pgadmin-img-docker: pgadmin-img-build
 
 # Special case args: CCP_PGBOUNCER_VERSION
-pgbouncer-img-build: ccbase-image $(CCPROOT)/build/pgbouncer/Dockerfile
+pgbouncer-img-build: $(CCPROOT)/build/pgbouncer/Dockerfile
 	$(IMGCMDSTEM) \
 		-f $(CCPROOT)/build/pgbouncer/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-pgbouncer:$(CCP_IMAGE_TAG) \
-		--build-arg BASEOS=$(CCP_BASEOS) \
-		--build-arg BASEVER=$(CCP_VERSION) \
-		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
+		-t $(CCP_IMAGE_PREFIX)/pgbouncer:$(CCP_BASEOS)-$(CCP_PGBOUNCER_VERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION) \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
-		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PGBOUNCER_VER=$(CCP_PGBOUNCER_VERSION) \
-		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		$(CCPROOT)
 

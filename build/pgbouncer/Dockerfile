@@ -1,19 +1,11 @@
-ARG BASEOS
-ARG BASEVER
-ARG PG_FULL
-ARG PREFIX
-FROM highgo-base:${BASEOS}-${PG_FULL}-${BASEVER}
+FROM redhat/ubi8:latest
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
-ARG DFSET
 ARG PACKAGER
-
 ARG PG_MAJOR
 ARG PGBOUNCER_VER
 
-RUN ${PACKAGER} -y update epel-release \
-	&& ${PACKAGER} -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
-#	&& ${PACKAGER} -y clean all
+RUN ${PACKAGER} -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
 	&& ${PACKAGER} -y makecache
 
 LABEL name="pgbouncer" \
