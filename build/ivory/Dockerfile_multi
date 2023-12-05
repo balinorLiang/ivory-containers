@@ -1,14 +1,14 @@
 ARG BASEOS
 ARG BASEVER
 ARG PG_FULL
+ARG IVY_FULL
 ARG PREFIX
 ARG BASE_IMAGE_NAME
-FROM ${BASE_IMAGE_NAME}:${BASEOS}-${PG_FULL}-${BASEVER} as step1
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${BASEVER} as step1
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG PG_FULL
 ARG BASEOS
-ARG DFSET
 ARG PACKAGER
 
 # ===== Early lines ordered for leveraging cache, reorder carefully =====
@@ -64,20 +64,20 @@ RUN cd pgnodemx-1.6 \
 	&& make USE_PGXS=1 install \
 	&& rm -rf ../pgnodemx-1.6
 
-###################################################################################################
-FROM ${BASE_IMAGE_NAME}:${BASEOS}-${PG_FULL}-${BASEVER}
+###########################################################################
+###
+###########################################################################
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${BASEVER}
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG PG_FULL
 ARG BASEOS
-ARG DFSET
 ARG PACKAGER
 
 # ===== Early lines ordered for leveraging cache, reorder carefully =====
 ARG PG_MAJOR
 ARG IVY_MAJOR
 # Needed due to lack of environment substitution trick on ADD
-ARG PG_LBL
 
 RUN ${PACKAGER} -y update epel-release \
         && ${PACKAGER} -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
@@ -127,7 +127,9 @@ LABEL name="ivory" \
         io.k8s.display-name="Highgo IvorySQL" \
         io.openshift.tags="ivorysql,postgresql,postgres,postgis,sql,nosql,database,ha,highgo" \
         postgresql.version.major="${PG_MAJOR}" \
-        postgresql.version="${PG_FULL}"
+        postgresql.version="${PG_FULL}" \
+        ivorysql.version.major="${IVY_MAJOR}" \
+        ivorysql.version="${IVY_FULL}"
 
 # set up crunchy directory
 RUN mkdir -p /opt/crunchy/bin /opt/crunchy/conf /pgdata /pgwal /pgconf /backrestrepo

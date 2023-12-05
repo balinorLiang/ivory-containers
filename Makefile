@@ -7,20 +7,20 @@ CCP_BASEOS ?= ubi8
 BASE_IMAGE_OS ?= $(CCP_BASEOS)
 #BASE_IMAGE_OS ?= rockylinux/rockylinux:8-ubi
 CCP_IMAGE_PREFIX ?= ivorysql
-CCP_PGVERSION ?= 15
-CCP_PG_FULLVERSION ?= 15.2
+CCP_PGVERSION ?= 16
+CCP_PG_FULLVERSION ?= 16.0
+CCP_IVYVERSION ?= 3
+CCP_IVY_FULLVERSION ?= 3.0
 CCP_PATRONI_VERSION ?= 2.1.4
 CCP_BACKREST_VERSION ?= 2.47
-CCP_VERSION ?= 1
+CCP_VERSION ?= 2.0
 CCP_POSTGIS_VERSION ?= 3.4
 CCP_POSTGIS_FULL_VERSION ?= 3.4.2
-CCP_PGADMIN_VERSION ?= 8.0
-CCP_PGBOUNCER_VERSION ?= 1.21.0
-CCP_IVYO_VERSION ?= 2.0
-CCP_PGEXPORTER_VERSION ?= 0.15.0
-CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_VERSION)
-CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_PG_FULLVERSION)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
-PACKAGER ?= yum
+CCP_PGADMIN_VERSION ?= 7.4
+CCP_PGBOUNCER_VERSION ?= 1.18.0
+CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_IVY_FULLVERSION)-$(CCP_VERSION)
+CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
+PACKAGER ?= dnf
 
 # Valid values: buildah (default), docker
 IMGBUILDER ?= docker
@@ -51,46 +51,26 @@ endif
 # Allows consolidation of ubi/rhel Dockerfile sets
 ifeq ("$(CCP_BASEOS)", "ubi8")
         DFSET=rhel
-	ifeq ("$(BASE_IMAGE_OS)", "ubi8")	
-		PACKAGER=dnf
-	endif
-	ifeq ("$(BASE_IMAGE_OS)", "ubi8-minimal")
-                PACKAGER=microdnf
-        endif
 endif
 
-ifeq ("$(CCP_BASEOS)", "centos7")
-        DFSET=centos
-        PACKAGER=yum
-        DOCKERBASEREGISTRY=docker.io/centos:
-endif
-
-ifeq ("$(CCP_BASEOS)", "centos8")
-        DFSET=centos
-        PACKAGER=dnf
-        DOCKERBASEREGISTRY=docker.io/centos:
-endif
-
-.PHONY:	all license pgbackrest-images pg-independent-images pgimages
+.PHONY:	all license pgbackrest-images pg-independent-images ivyimages
 
 # list of image names, helpful in pushing
-images = crunchy-postgres \
-	crunchy-upgrade \
-	crunchy-pgbackrest \
-	crunchy-pgbouncer \
-	crunchy-pgadmin4
-	# crunchy-pgbadger
-	# crunchy-pgpool
+images = ivorysql-ivorysql \
+	ivorysql-pgbackrest \
+	ivorysql-pgbouncer \
+	ivorysql-pgadmin4 \
+	ivorysql-postgis \
+	ivorysql-postgres-exporter
 
 # Default target
-all: pgimages pg-independent-images pgbackrest-images
+all: ivyimages pg-independent-images pgbackrest-images
 
 # Build images that either don't have a PG dependency or using the latest PG version is all that is needed
 pg-independent-images: pgbouncer pgadmin4
-# pg-independent-images: pgbadger pgpool
 
 # Build images that require a specific postgres version - ordered for potential concurrent benefits
-pgimages: postgres postgres-gis upgrade
+ivyimages: ivorysql ivorysql-postgis
 
 # Build images based on pgBackRest
 pgbackrest-images: pgbackrest
@@ -101,10 +81,11 @@ pgbackrest-images: pgbackrest
 
 pgadmin4: pgadmin4-img-$(IMGBUILDER)
 pgexporter: pgexporter-img-$(IMGBUILDER)
-pgbackrest: pgbackrest-pgimg-$(IMGBUILDER)
+pgbackrest: pgbackrest-ivyimg-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
-postgres: postgres-pgimg-$(IMGBUILDER)
-postgres-gis: postgres-gis-pgimg-$(IMGBUILDER)
+ivorysql: ivorysql-ivyimg-$(IMGBUILDER)
+postgres-gis: postgres-gis-ivyimg-$(IMGBUILDER)
+pgexporter: pgexporter-img-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
@@ -120,20 +101,18 @@ ccbase-image-build: build-pgbackrest license $(CCPROOT)/build/base/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/base/Dockerfile \
-		-t highgo-base:$(CCP_IMAGE_TAG) \
+		-t ivorysql/base:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg RELVER=$(CCP_VERSION) \
-		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg DOCKERBASEREGISTRY=$(DOCKERBASEREGISTRY) \
 		--build-arg BASE_IMAGE_OS=$(BASE_IMAGE_OS) \
-		--build-arg PG_LBL=${subst .,,$(CCP_PGVERSION)} \
 		$(CCPROOT)
 
 ccbase-image-buildah: ccbase-image-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-base:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-base:$(CCP_IMAGE_TAG)
+	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/base:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/base:$(CCP_IMAGE_TAG)
 endif
 
 ccbase-image-docker: ccbase-image-build
@@ -143,7 +122,7 @@ ccbase-ext-image-build: ccbase-image $(CCPROOT)/build/base-ext/Dockerfile
 	$(IMGCMDSTEM) \
                 --network=host \
 		-f $(CCPROOT)/build/base-ext/Dockerfile \
-		-t highgo-base-ext:$(CCP_IMAGE_TAG) \
+		-t ivorysql/ivorysql-base-ext:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
@@ -161,85 +140,78 @@ ccbase-ext-image-docker: ccbase-ext-image-build
 
 # ----- Special case pg-based image (postgres) -----
 # Special case args: BACKREST_VER
-postgres-pgimg-build: ccbase-image $(CCPROOT)/build/ivory/Dockerfile_multi 
+ivorysql-ivyimg-build: ccbase-image $(CCPROOT)/build/ivory/Dockerfile_multi 
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/ivory/Dockerfile_multi \
-		-t $(CCP_IMAGE_PREFIX)/highgo-ivory:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/ivorysql:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
-		--build-arg PG_LBL=${subst .,,$(CCP_PGVERSION)} \
+		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
-		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
-		--build-arg BASE_IMAGE_NAME=highgo-base \
+		--build-arg BASE_IMAGE_NAME=ivorysql/base \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		$(CCPROOT)
 
-postgres-pgimg-buildah: postgres-pgimg-build ;
+ivorysql-ivyimg-buildah: ivorysql-ivyimg-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-postgres:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-postgres:$(CCP_IMAGE_TAG)
+	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/ivorysql:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/ivorysql:$(CCP_IMAGE_TAG)
 endif
 
-postgres-pgimg-docker: postgres-pgimg-build
+ivorysql-ivyimg-docker: ivorysql-ivyimg-build
 
-# ----- Special case pg-based image (postgres-gis-base) -----
+# ----- Special case ivy-based image (postgres-gis-base) -----
 # Used as the base for the postgres-gis image.
-postgres-gis-base-pgimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres/Dockerfile
+postgres-gis-base-ivyimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/ivory/Dockerfile_multi \
-		-t $(CCP_IMAGE_PREFIX)/highgo-postgres-gis-base:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis-base:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
-		--build-arg PG_LBL=${subst .,,$(CCP_PGVERSION)} \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
-		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
-		--build-arg BASE_IMAGE_NAME=highgo/highgo-base-ext \
+		--build-arg BASE_IMAGE_NAME=ivorysql/ivorysql-base-ext \
 		$(CCPROOT)
 
-postgres-gis-base-pgimg-buildah: postgres-gis-base-pgimg-build ;
+postgres-gis-base-ivyimg-buildah: postgres-gis-base-ivyimg-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-postgres-gis-base:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-postgres-gis-base:$(CCP_IMAGE_TAG)
+	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis-base:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis-base:$(CCP_IMAGE_TAG)
 endif
 
 # ----- Special case pg-based image (postgres-gis) -----
 # Special case args: POSTGIS_LBL
-postgres-gis-pgimg-build: postgres-gis-base-pgimg-build $(CCPROOT)/build/postgres-gis/Dockerfile
+postgres-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postgres-gis/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/postgres-gis/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/highgo-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
-		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
-		--build-arg POSTGIS_LBL=$(subst .,,$(CCP_POSTGIS_VERSION)) \
-		--build-arg POSTGIS_FULL_VER=$(CCP_POSTGIS_FULL_VERSION) \
-		--build-arg DFSET=$(DFSET) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		$(CCPROOT)
 
-postgres-gis-pgimg-buildah: postgres-gis-pgimg-build ;
+postgres-gis-ivyimg-buildah: postgres-gis-ivyimg-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG)
+	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG)
 endif
 
-postgres-gis-pgimg-docker: postgres-gis-pgimg-build
+postgres-gis-ivyimg-docker: postgres-gis-ivyimg-build
 
 # ----- Special case image (pgbackrest) -----
 
@@ -248,52 +220,26 @@ build-pgbackrest:
 	go build -o bin/pgbackrest/pgbackrest ./cmd/pgbackrest
 
 # Special case args: BACKREST_VER
-pgbackrest-pgimg-build: ccbase-image build-pgbackrest $(CCPROOT)/build/pgbackrest/Dockerfile
+pgbackrest-ivyimg-build: ccbase-image build-pgbackrest $(CCPROOT)/build/pgbackrest/Dockerfile
 	$(IMGCMDSTEM) \
 		-f $(CCPROOT)/build/pgbackrest/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/highgo-pgbackrest:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/pgbackrest:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
-		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
-		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
+		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
+		--build-arg BASE_IMAGE_NAME=ivorysql/base \
 		$(CCPROOT)
 
-pgbackrest-pgimg-buildah: pgbackrest-pgimg-build ;
+pgbackrest-ivyimg-buildah: pgbackrest-ivyimg-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-pgbackrest:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-pgbackrest:$(CCP_IMAGE_TAG)
+	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/pgbackrest:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/pgbackrest:$(CCP_IMAGE_TAG)
 endif
 
-pgbackrest-pgimg-docker: pgbackrest-pgimg-build
-
-# ----- Special case image (upgrade) -----
-
-# Special case args: UPGRADE_PG_VERSIONS (defines all versions of PG that will be installed) 
-upgrade-img-build: ccbase-image $(CCPROOT)/build/upgrade/Dockerfile
-	$(IMGCMDSTEM) \
-		-f $(CCPROOT)/build/upgrade/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-upgrade:$(CCP_IMAGE_TAG) \
-		--build-arg BASEOS=$(CCP_BASEOS) \
-		--build-arg BASEVER=$(CCP_VERSION) \
-		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
-		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
-		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
-		--build-arg DFSET=$(DFSET) \
-		--build-arg PACKAGER=$(PACKAGER) \
-		--build-arg UPGRADE_PG_VERSIONS="$(shell find $(CCPROOT)/conf -type f -name "crunchypg*.repo" | \
-			grep -o [1-9][0-9])" \
-		$(CCPROOT)
-
-upgrade-img-buildah: upgrade-img-build ;
-# only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
-ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-upgrade:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-upgrade:$(CCP_IMAGE_TAG)
-endif
-
-upgrade-img-docker: upgrade-img-build
+pgbackrest-ivyimg-docker: pgbackrest-ivyimg-build
 
 pgexporter-img-build: $(CCPROOT)/build/pgexporter/Dockerfile
 	$(IMGCMDSTEM) \
@@ -343,7 +289,7 @@ pgbouncer-img-docker: pgbouncer-img-build
 %-img-build: ccbase-image $(CCPROOT)/build/%/Dockerfile
 	$(IMGCMDSTEM) \
 		-f $(CCPROOT)/build/$*/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/crunchy-$*:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/ivorysql-$*:$(CCP_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
@@ -356,18 +302,10 @@ pgbouncer-img-docker: pgbouncer-img-build
 %-img-buildah: %-img-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
-	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/crunchy-$*:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/crunchy-$*:$(CCP_IMAGE_TAG)
+	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/ivorysql-$*:$(CCP_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/ivorysql-$*:$(CCP_IMAGE_TAG)
 endif
 
 %-img-docker: %-img-build ;
-
-# ----- Upgrade Images -----
-upgrade: upgrade-$(CCP_PGVERSION)
-
-upgrade-%: upgrade-img-$(IMGBUILDER) ;
-
-upgrade-9.5: # Do nothing but log to avoid erroring out on missing Dockerfile
-	$(info Upgrade build skipped for 9.5)
 
 #=================
 # Utility targets
@@ -384,7 +322,7 @@ license:
 push: push-gis $(images:%=push-%) ;
 
 push-gis:
-	$(IMG_PUSHER_PULLER) push $(CCP_IMAGE_PREFIX)/crunchy-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG)
+	$(IMG_PUSHER_PULLER) push $(CCP_IMAGE_PREFIX)/postgis:$(CCP_POSTGIS_IMAGE_TAG)
 
 push-%:
 	$(IMG_PUSHER_PULLER) push $(CCP_IMAGE_PREFIX)/$*:$(CCP_IMAGE_TAG)
