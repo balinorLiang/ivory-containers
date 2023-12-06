@@ -21,7 +21,7 @@ CCP_PGBOUNCER_VERSION ?= 1.21.0
 CCP_PGEXPORTER_VERSION ?= 0.15.0
 CCP_IVYO_VERSION ?= 2.0
 CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_IVY_FULLVERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION)
-CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
+CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_POSTGIS_VERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION)
 PACKAGER ?= dnf
 
 # Valid values: buildah (default), docker
@@ -231,7 +231,7 @@ build-pgbackrest:
 pgbackrest-ivyimg-build: ccbase-image build-pgbackrest $(CCPROOT)/build/pgbackrest/Dockerfile
 	$(IMGCMDSTEM) \
 		-f $(CCPROOT)/build/pgbackrest/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/pgbackrest:$(CCP_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/pgbackrest:$(CCP_BASEOS)-$(CCP_BACKREST_VERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
