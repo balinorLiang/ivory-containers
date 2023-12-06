@@ -128,6 +128,8 @@ ccbase-ext-image-build: ccbase-image $(CCPROOT)/build/base-ext/Dockerfile
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
+		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
+		--build-arg BASE_IMAGE_NAME=ivorysql/base \
 		$(CCPROOT)
 
 ccbase-ext-image-buildah: ccbase-ext-image-build ;
@@ -182,6 +184,7 @@ postgres-gis-base-ivyimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
+		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
 		--build-arg BASE_IMAGE_NAME=ivorysql/ivorysql-base-ext \
 		$(CCPROOT)
 
@@ -201,6 +204,7 @@ postgres-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postg
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
+		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		$(CCPROOT)
