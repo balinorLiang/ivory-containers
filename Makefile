@@ -154,7 +154,7 @@ ivorysql-ivyimg-docker: ivorysql-ivyimg-build
 
 # ----- Special case ivy-based image (postgres-gis-base) -----
 # Used as the base for the postgres-gis image.
-postgres-gis-base-ivyimg-build: ccbase-image-build $(CCPROOT)/build/postgres/Dockerfile
+postgres-gis-base-ivyimg-build: ccbase-image-build $(CCPROOT)/build/ivory/Dockerfile_multi
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/ivory/Dockerfile_multi \
