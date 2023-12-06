@@ -152,6 +152,7 @@ ivorysql-ivyimg-build: ccbase-image $(CCPROOT)/build/ivory/Dockerfile_multi
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
 		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
+		--build-arg IVYO_VER=$(CCP_IVYO_VERSION) \
 		--build-arg PG_MAJOR=$(CCP_PGVERSION) \
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
