@@ -170,7 +170,7 @@ postgres-gis-base-ivyimg-build: ccbase-image-build $(CCPROOT)/build/ivory/Docker
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
 		--build-arg IVYO_VER=$(CCP_IVYO_VERSION) \
-		--build-arg BASE_IMAGE_NAME=ivorysql/ivorysql-base-ext \
+		--build-arg BASE_IMAGE_NAME=ivorysql/base \
 		$(CCPROOT)
 
 postgres-gis-base-ivyimg-buildah: postgres-gis-base-ivyimg-build ;
