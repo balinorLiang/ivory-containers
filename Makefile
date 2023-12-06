@@ -21,7 +21,7 @@ CCP_PGBOUNCER_VERSION ?= 1.21.0
 CCP_PGEXPORTER_VERSION ?= 0.15.0
 CCP_IVYO_VERSION ?= 2.0
 CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_IVY_FULLVERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION)
-CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_POSTGIS_VERSION)-$(CCP_IVYO_VERSION)-$(CCP_VERSION)
+CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
 PACKAGER ?= dnf
 
 # Valid values: buildah (default), docker
@@ -82,7 +82,7 @@ pgbackrest-images: pgbackrest
 #===========================================
 
 pgadmin4: pgadmin4-img-$(IMGBUILDER)
-pgexporter: Ivory-img-$(IMGBUILDER)
+pgexporter: pgexporter-img-$(IMGBUILDER)
 pgbackrest: pgbackrest-ivyimg-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
 ivorysql: ivorysql-ivyimg-$(IMGBUILDER)
