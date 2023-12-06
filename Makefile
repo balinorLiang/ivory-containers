@@ -185,7 +185,7 @@ postgres-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postg
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/postgres-gis/Dockerfile \
-		-t $(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) \
+		-t $(CCP_IMAGE_PREFIX)/postgis:$(CCP_POSTGIS_IMAGE_TAG) \
 		--build-arg BASEOS=$(CCP_BASEOS) \
 		--build-arg BASEVER=$(CCP_VERSION) \
 		--build-arg PG_FULL=$(CCP_PG_FULLVERSION) \
