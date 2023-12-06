@@ -16,8 +16,8 @@ CCP_BACKREST_VERSION ?= 2.47
 CCP_VERSION ?= 2.0
 CCP_POSTGIS_VERSION ?= 3.4
 CCP_POSTGIS_FULL_VERSION ?= 3.4.2
-CCP_PGADMIN_VERSION ?= 7.4
-CCP_PGBOUNCER_VERSION ?= 1.18.0
+CCP_PGADMIN_VERSION ?= 8.0
+CCP_PGBOUNCER_VERSION ?= 1.21.0
 CCP_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_IVY_FULLVERSION)-$(CCP_VERSION)
 CCP_POSTGIS_IMAGE_TAG ?= $(CCP_BASEOS)-$(CCP_POSTGIS_VERSION)-$(CCP_VERSION)
 PACKAGER ?= dnf
@@ -85,7 +85,6 @@ pgbackrest: pgbackrest-ivyimg-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
 ivorysql: ivorysql-ivyimg-$(IMGBUILDER)
 postgres-gis: postgres-gis-ivyimg-$(IMGBUILDER)
-pgexporter: pgexporter-img-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
