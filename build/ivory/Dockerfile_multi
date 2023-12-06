@@ -4,7 +4,8 @@ ARG PG_FULL
 ARG IVY_FULL
 ARG PREFIX
 ARG BASE_IMAGE_NAME
-FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${BASEVER} as step1
+ARG IVYO_VER 
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER} as step1
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG PG_FULL
@@ -67,7 +68,7 @@ RUN cd pgnodemx-1.6 \
 ###########################################################################
 ###
 ###########################################################################
-FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${BASEVER}
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER} 
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG PG_FULL

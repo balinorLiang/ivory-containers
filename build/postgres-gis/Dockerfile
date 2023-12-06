@@ -2,8 +2,9 @@ ARG BASEOS
 ARG BASEVER
 ARG PG_FULL
 ARG IVY_FULL
+ARG IVYO_VER
 ARG PREFIX
-FROM ${PREFIX}/ivorysql-postgres-gis-base:${BASEOS}-${IVY_FULL}-${BASEVER} as step1
+FROM ${PREFIX}/ivorysql-postgres-gis-base:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER} as step1
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG BASEOS
@@ -98,7 +99,7 @@ RUN cd postgis-3.4.0 \
 ##############################################################################
 ##### stage2
 ##############################################################################
-FROM ${PREFIX}/ivorysql-postgres-gis-base:${BASEOS}-${IVY_FULL}-${BASEVER}
+FROM ${PREFIX}/ivorysql-postgres-gis-base:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER}
 ARG BASEOS
 ARG PACKAGER
 
