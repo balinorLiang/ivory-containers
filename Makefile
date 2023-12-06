@@ -187,6 +187,7 @@ postgres-gis-base-ivyimg-build: ccbase-ext-image-build $(CCPROOT)/build/postgres
 		--build-arg PATRONI_VER=$(CCP_PATRONI_VERSION) \
 		--build-arg IVY_MAJOR=$(CCP_IVYVERSION) \
 		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
+		--build-arg IVYO_VER=$(CCP_IVYO_VERSION) \
 		--build-arg BASE_IMAGE_NAME=ivorysql/ivorysql-base-ext \
 		$(CCPROOT)
 
@@ -209,6 +210,7 @@ postgres-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postg
 		--build-arg IVY_FULL=$(CCP_IVY_FULLVERSION) \
 		--build-arg PREFIX=$(CCP_IMAGE_PREFIX) \
 		--build-arg PACKAGER=$(PACKAGER) \
+		--build-arg IVYO_VER=$(CCP_IVYO_VERSION) \
 		$(CCPROOT)
 
 postgres-gis-ivyimg-buildah: postgres-gis-ivyimg-build ;
@@ -237,6 +239,7 @@ pgbackrest-ivyimg-build: ccbase-image build-pgbackrest $(CCPROOT)/build/pgbackre
 		--build-arg BACKREST_VER=$(CCP_BACKREST_VERSION) \
 		--build-arg PACKAGER=$(PACKAGER) \
 		--build-arg BASE_IMAGE_NAME=ivorysql/base \
+		--build-arg IVYO_VER=$(CCP_IVYO_VERSION) \
 		$(CCPROOT)
 
 pgbackrest-ivyimg-buildah: pgbackrest-ivyimg-build ;
