@@ -11,7 +11,8 @@ ARG PACKAGER
 ARG BACKREST_VER
 ARG BASEOS
 
-RUN wget https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
+RUN ${PACKAGER} -y install wget \
+    && wget https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
 	&& rpm -ivh pgdg-redhat-repo-latest.noarch.rpm
 
 LABEL name="pgbackrest" \
