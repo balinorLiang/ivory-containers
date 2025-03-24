@@ -27,7 +27,7 @@ RUN wget https://github.com/IvorySQL/IvorySQL/releases/download/IvorySQL_4.4/Ivo
 RUN rpm -ivh IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 
  
-ENV IVYROOT="/opt/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
+ENV IVYROOT="/opt/IvorySQL-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
 ENV PATH="${IVYROOT}/bin:${PATH}"
 
 # insatll pgaudit
