@@ -57,9 +57,8 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
 fi
 
 # Add IvorySQL yum repository
-ADD rpms/ivorysql-release-3.0-1.noarch.rpm /
-
-# Add PG repo files
-# Install repos
-RUN rpm -ivh ivorysql-release-3.0-1.noarch.rpm \
-	&& rm -f ivorysql-release-3.0-1.noarch.rpm
+RUN echo "[ivorysql4]"  >> /etc/yum.repos.d/ivorysql.repo \
+        && echo "name=IvorySQL Server 4 \$releasever - \$basearch"  >> /etc/yum.repos.d/ivorysql.repo \
+        && echo "baseurl=https://yum.highgo.com/dists/ivorysql-rpms/4/redhat/rhel-\$releasever-\$basearch"  >> /etc/yum.repos.d/ivorysql.repo \
+        && echo "enabled=1"  >> /etc/yum.repos.d/ivorysql.repo \
+        && echo "gpgcheck=0"  >> /etc/yum.repos.d/ivorysql.repo;
