@@ -11,8 +11,8 @@ ARG PACKAGER
 ARG BACKREST_VER
 ARG BASEOS
 
-RUN yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
- && ${PACKAGER} -y clean all
+RUN wget https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
+	&& rpm -ivh pgdg-redhat-repo-latest.noarch.rpm
 
 LABEL name="pgbackrest" \
 	summary="Crunchy pgBackRest ${BACKREST_VER}" \
