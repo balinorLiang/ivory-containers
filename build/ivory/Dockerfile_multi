@@ -17,53 +17,53 @@ ARG PG_MAJOR
 ARG IVY_MAJOR
 
 RUN  ${PACKAGER} -y install \
-	ivorysql3-devel-3.0 \
+	ivorysql4-devel-4.4 \
 	redhat-rpm-config \
 	openssl-devel \
 	make \
 	&& ${PACKAGER} -y clean all
 RUN dnf install -y libxslt tcl
-RUN dnf install -y ivorysql3-server-3.0 \
-	ivorysql3-contrib-3.0 \
-	ivorysql3-plperl-3.0 \
-	ivorysql3-plpython3-3.0 \
-	ivorysql3-pltcl-3.0
+RUN dnf install -y ivorysql4-server-4.4 \
+	ivorysql4-contrib-4.4 \
+	ivorysql4-plperl-4.4 \
+	ivorysql4-plpython3-4.4 \
+	ivorysql4-pltcl-4.4
  
 ENV IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
 ENV PATH="${IVYROOT}/bin:${PATH}"
 
 # insatll pgaudit
-ADD resource/pgaudit-16.0.tar.gz /
-RUN cd pgaudit-16.0 \
+ADD resource/pgaudit-17.0.tar.gz /
+RUN cd pgaudit-17.0 \
         && make install USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
-        && rm -rf ../pgaudit-16.0
+        && rm -rf ../pgaudit-17.0
 # insatll pg_cron
-ADD resource/pg_cron-1.6.2.tar.gz /
-RUN cd pg_cron-1.6.2 \
+ADD resource/pg_cron-1.6.4.tar.gz /
+RUN cd pg_cron-1.6.4 \
         && make USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
         && make install USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
-        && rm -rf ../pg_cron-1.6.2
+        && rm -rf ../pg_cron-1.6.4
 # install timescaledb
-#ADD resource/timescaledb-2.12.2.tar.gz /
-#RUN cd timescaledb-2.12.2 \
-#        && ./bootstrap \
-#        && cd build \
-#        && make PG_CONFIG=$IVYROOT/bin/pg_config \
-#        && make install PG_CONFIG=$IVYROOT/bin/pg_config \
-#	&& rm -rf ../timescaledb-2.12.2
+ADD resource/timescaledb-2.19.0.tar.gz /
+RUN cd timescaledb-2.19.0 \
+        && ./bootstrap \
+        && cd build \
+        && make PG_CONFIG=$IVYROOT/bin/pg_config \
+        && make install PG_CONFIG=$IVYROOT/bin/pg_config \
+	&& rm -rf ../timescaledb-2.19.0
 # install wal2json
-ADD resource/wal2json_2_5.tar.gz /
-RUN cd wal2json-wal2json_2_5 \
+ADD resource/wal2json_2_6.tar.gz /
+RUN cd wal2json-wal2json_2_6 \
 	&& export PATH=$IVYROOT/bin:$PATH \
 	&& make \
 	&& make install \
-	&& rm -rf ../wal2json-wal2json_2_5
+	&& rm -rf ../wal2json-wal2json_2_6
 # install pgnodemx
-ADD resource/pgnodemx-1.6.tar.gz /
-RUN cd pgnodemx-1.6 \
+ADD resource/pgnodemx-1.7.tar.gz /
+RUN cd pgnodemx-1.7 \
 	&& make USE_PGXS=1 \
 	&& make USE_PGXS=1 install \
-	&& rm -rf ../pgnodemx-1.6
+	&& rm -rf ../pgnodemx-1.7
 
 ###########################################################################
 ###
