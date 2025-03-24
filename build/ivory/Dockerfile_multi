@@ -21,8 +21,8 @@ RUN  ${PACKAGER} -y install \
 	openssl-devel \
 	make \
 	&& ${PACKAGER} -y clean all
-RUN dnf install -y libxslt tcl
-RUN dnf install -y IvorySQL-4.4
+RUN ${PACKAGER} install -y libxslt tcl
+RUN ${PACKAGER} install -y IvorySQL-4.4
 
  
 ENV IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
