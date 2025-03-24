@@ -117,8 +117,8 @@ RUN cat /dev/null > /etc/pgbackrest.conf
 COPY --from=step1 /opt/IvorySQL-${IVY_MAJOR} /usr/local/ivorysql/IvorySQL-${IVY_MAJOR}
 
 # install patroni for Kube
-RUN pip3 install --upgrade python-dateutil -i https://pypi.douban.com/simple/ \
-        && pip3 install patroni[kubernetes]=="${PATRONI_VER}" -i https://pypi.douban.com/simple/
+RUN pip3 install --upgrade python-dateutil \
+	&& pip3 install patroni[kubernetes]=="${PATRONI_VER}"
 
 ENV PATH="${IVYROOT}/bin:${PATH}"
 
