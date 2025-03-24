@@ -79,7 +79,7 @@ ARG IVY_MAJOR
 RUN ${PACKAGER} -y update epel-release \
         && ${PACKAGER} -y install wget \
         && wget https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
-        && ${PACKAGER} -y install pgdg-redhat-repo-latest.noarch.rpm
+        && rpm -ivh pgdg-redhat-repo-latest.noarch.rpm
 
 # Preserving PGVERSION out of paranoia
 ENV PGROOT="/usr/pgsql-${PG_MAJOR}" PGVERSION="${PG_MAJOR}" IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
