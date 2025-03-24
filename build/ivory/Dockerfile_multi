@@ -22,10 +22,12 @@ RUN  ${PACKAGER} -y install \
 	make \
 	&& ${PACKAGER} -y clean all
 RUN ${PACKAGER} install -y libxslt tcl
-RUN ${PACKAGER} install -y IvorySQL-4.4
+RUN ${PACKAGER} install -y lz4 libicu libxslt python3 wget 
+RUN wget https://github.com/IvorySQL/IvorySQL/releases/download/IvorySQL_4.4/IvorySQL-4.4-a50789d-20250304.x86_64.rpm
+RUN rpm -ivh IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 
  
-ENV IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
+ENV IVYROOT="/opt/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
 ENV PATH="${IVYROOT}/bin:${PATH}"
 
 # insatll pgaudit
@@ -111,7 +113,7 @@ RUN ${PACKAGER} -y install \
 
 RUN cat /dev/null > /etc/pgbackrest.conf
 
-COPY --from=step1 /usr/local/ivorysql /usr/local/ivorysql/
+COPY --from=step1 /opt/IvorySQL-${IVY_MAJOR} /usr/local/ivorysql/IvorySQL-${IVY_MAJOR}
 
 # install patroni for Kube
 RUN pip3 install --upgrade python-dateutil -i https://pypi.douban.com/simple/ \
