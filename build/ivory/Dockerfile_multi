@@ -17,17 +17,13 @@ ARG PG_MAJOR
 ARG IVY_MAJOR
 
 RUN  ${PACKAGER} -y install \
-	ivorysql4-devel-4.4 \
 	redhat-rpm-config \
 	openssl-devel \
 	make \
 	&& ${PACKAGER} -y clean all
 RUN dnf install -y libxslt tcl
-RUN dnf install -y ivorysql4-server-4.4 \
-	ivorysql4-contrib-4.4 \
-	ivorysql4-plperl-4.4 \
-	ivorysql4-plpython3-4.4 \
-	ivorysql4-pltcl-4.4
+RUN dnf install -y IvorySQL-4.4
+
  
 ENV IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
 ENV PATH="${IVYROOT}/bin:${PATH}"
