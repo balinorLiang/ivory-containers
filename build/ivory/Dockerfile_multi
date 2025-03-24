@@ -26,6 +26,7 @@ RUN ${PACKAGER} install -y lz4 libicu libxslt python3 wget
 RUN wget https://github.com/IvorySQL/IvorySQL/releases/download/IvorySQL_4.4/IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 RUN rpm -ivh IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 
+RUN ${PACKAGER} install -y gcc
  
 ENV IVYROOT="/opt/IvorySQL-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
 ENV PATH="${IVYROOT}/bin:${PATH}"
