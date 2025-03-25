@@ -117,17 +117,17 @@ fi
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
         ${PACKAGER} install -y geos311 libtiff  && ${PACKAGER} -y clean all ; \
 fi
-RUN rm -rf /usr/local/ivorysql/ivorysql-3
+RUN rm -rf /usr/local/ivorysql/ivorysql-4
 COPY --from=step1 /usr/local/proj-8.2.1/lib/*.so /usr/local/proj-8.2.1/lib/
 COPY --from=step1 /usr/local/gdal-3.4.3/lib/*.so /usr/local/gdal-3.4.3/lib/
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/bin/pgsql2shp /usr/local/ivorysql/ivorysql-3/bin/pgsql2shp 
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/bin/raster2pgsql /usr/local/ivorysql/ivorysql-3/bin/raster2pgsql 
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/bin/shp2pgsql /usr/local/ivorysql/ivorysql-3/bin/shp2pgsql 
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/lib/bitcode /usr/local/ivorysql/ivorysql-3/lib/bitcode
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/lib/postgis* /usr/local/ivorysql/ivorysql-3/lib/
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/share/extension/postgis* /usr/local/ivorysql/ivorysql-3/share/extension/
-#COPY --from=step1 /usr/local/ivorysql/ivorysql-3/share/contrib/postgis-3.2 /usr/local/ivorysql/ivorysql-3/share/contrib/postgis-3.2
-COPY --from=step1 /usr/local/ivorysql/ivorysql-3 /usr/local/ivorysql/ivorysql-3
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/bin/pgsql2shp /usr/local/ivorysql/ivorysql-4/bin/pgsql2shp 
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/bin/raster2pgsql /usr/local/ivorysql/ivorysql-4/bin/raster2pgsql 
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/bin/shp2pgsql /usr/local/ivorysql/ivorysql-4/bin/shp2pgsql 
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/lib/bitcode /usr/local/ivorysql/ivorysql-4/lib/bitcode
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/lib/postgis* /usr/local/ivorysql/ivorysql-4/lib/
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/share/extension/postgis* /usr/local/ivorysql/ivorysql-4/share/extension/
+#COPY --from=step1 /usr/local/ivorysql/ivorysql-4/share/contrib/postgis-3.2 /usr/local/ivorysql/ivorysql-4/share/contrib/postgis-3.2
+COPY --from=step1 /usr/local/ivorysql/ivorysql-4 /usr/local/ivorysql/ivorysql-4
 
 RUN sed -i '$a\/usr/local/proj-8.2.1/lib' /etc/ld.so.conf \
 	&& sed -i '$a\/usr/local/gdal-3.4.3/lib' /etc/ld.so.conf \
