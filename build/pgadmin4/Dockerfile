@@ -51,19 +51,19 @@ FROM redhat/ubi8:latest
 ARG PACKAGER
 ARG PG_MAJOR
 
-COPY --from=pg16-builder /usr/pgsql-${PG_MAJOR}/bin/pg_dump /usr/bin/pg_dump
-COPY --from=pg16-builder /usr/pgsql-${PG_MAJOR}/bin/pg_dumpall /usr/bin/pg_dumpall
-COPY --from=pg16-builder /usr/pgsql-${PG_MAJOR}/bin/pg_restore /usr/bin/pg_restore
-COPY --from=pg16-builder /usr/pgsql-${PG_MAJOR}/bin/psql /usr/bin/psql
-COPY --from=pg16-builder /usr/lib64/libpq.so.5.13 /usr/lib64
+COPY --from=pg17-builder /usr/pgsql-${PG_MAJOR}/bin/pg_dump /usr/bin/pg_dump
+COPY --from=pg17-builder /usr/pgsql-${PG_MAJOR}/bin/pg_dumpall /usr/bin/pg_dumpall
+COPY --from=pg17-builder /usr/pgsql-${PG_MAJOR}/bin/pg_restore /usr/bin/pg_restore
+COPY --from=pg17-builder /usr/pgsql-${PG_MAJOR}/bin/psql /usr/bin/psql
+COPY --from=pg17-builder /usr/lib64/libpq.so.5.13 /usr/lib64
 
-COPY --from=pg16-builder /usr/lib/python3.9 /usr/lib/python3.9
-COPY --from=pg16-builder /usr/bin/python3.9 /usr/bin/python3.9
-COPY --from=pg16-builder /usr/bin/pip3.9 /usr/bin/pip3.9
-COPY --from=pg16-builder /usr/lib64/libpython3.9.so.1.0 /usr/lib64/
-COPY --from=pg16-builder /usr/lib64/python3.9 /usr/lib64/python3.9
-COPY --from=pg16-builder /var/lib/pgadmin/ /var/lib/pgadmin/
-COPY --from=pg16-builder /etc/httpd/modules/mod_wsgi_python3.so /
+COPY --from=pg17-builder /usr/lib/python3.9 /usr/lib/python3.9
+COPY --from=pg17-builder /usr/bin/python3.9 /usr/bin/python3.9
+COPY --from=pg17-builder /usr/bin/pip3.9 /usr/bin/pip3.9
+COPY --from=pg17-builder /usr/lib64/libpython3.9.so.1.0 /usr/lib64/
+COPY --from=pg17-builder /usr/lib64/python3.9 /usr/lib64/python3.9
+COPY --from=pg17-builder /var/lib/pgadmin/ /var/lib/pgadmin/
+COPY --from=pg17-builder /etc/httpd/modules/mod_wsgi_python3.so /
 
 LABEL name="pgadmin4" \
         summary="pgAdmin4 GUI utility" \
