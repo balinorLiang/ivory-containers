@@ -38,7 +38,7 @@ RUN mkdir -p /var/lib/pgadmin
 RUN rpm -i https://ftp.postgresql.org/pub/pgadmin/pgadmin4/yum/pgadmin4-redhat-repo-2-1.noarch.rpm 
 RUN ${PACKAGER} -y install --nodocs \
                 --setopt=skip_missing_names_on_install=False \
-                --setopt=obsoletes=0 pgadmin4-web-8.0
+                --setopt=obsoletes=0 pgadmin4-web-8.14-1
 
 RUN cp -rf /usr/pgadmin4/venv/lib/python3.9/site-packages/* /usr/lib/python3.9/site-packages/ \
     && cp -rp /usr/pgadmin4/web /usr/lib/python3.9/site-packages/pgadmin4-web
