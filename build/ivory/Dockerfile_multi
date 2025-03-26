@@ -114,7 +114,7 @@ RUN ${PACKAGER} -y install \
 
 RUN cat /dev/null > /etc/pgbackrest.conf
 
-COPY --from=step1 /opt/IvorySQL-${IVY_MAJOR} /usr/local/ivorysql/IvorySQL-${IVY_MAJOR}
+COPY --from=step1 /opt/IvorySQL-${IVY_MAJOR} /usr/local/ivorysql/ivorysql-${IVY_MAJOR}
 
 # install patroni for Kube
 RUN pip3 install --upgrade python-dateutil \
