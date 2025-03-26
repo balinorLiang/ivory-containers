@@ -92,7 +92,7 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install which libtool libxml2-devel redhat-rpm-config clang llvm; \
 fi
 
-ENV LD_LIBRARY_PATH="/usr/local/ivorysql/ivorysql-4.4/lib:/usr/local/geos-3.9.2/lib:/usr/lib64:$LD_LIBRARY_PATH"
+ENV LD_LIBRARY_PATH="/usr/lib64:/usr/local/geos-3.9.2/lib:/usr/local/ivorysql/ivorysql-4.4/lib:$LD_LIBRARY_PATH"
 
 ADD build/postgres-gis/postgis-3.4.0.tar.gz /
 RUN cd postgis-3.4.0 \
