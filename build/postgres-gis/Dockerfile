@@ -61,6 +61,12 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	&& ./configure --prefix=/usr/local/geos-3.9.2 \
 	&& make && make install; \
 fi
+
+RUN if [ "$BASEOS" = "ubi8" ] ; then \
+	microdnf install -y findutils; \
+fi
+
+
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install libtool \
         && cd /protobuf-3.20.1 \
