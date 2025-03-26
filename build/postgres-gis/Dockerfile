@@ -56,17 +56,17 @@ fi
 ADD build/postgres-gis/geos-3.9.2.tar.bz2 /
 ADD build/postgres-gis/protobuf-c-1.4.1.tar.gz /
 ADD build/postgres-gis/protobuf-3.20.1.tar.gz /
-RUN if [ "$BASEOS" = "ubi8" ] ; then \
-	cd geos-3.9.2 \
-	&& ./configure --prefix=/usr/local/geos-3.9.2 \
-	&& make && make install; \
-fi
 
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	microdnf install -y findutils; \
 fi
 
 
+RUN if [ "$BASEOS" = "ubi8" ] ; then \
+	cd geos-3.9.2 \
+	&& ./configure --prefix=/usr/local/geos-3.9.2 \
+	&& make && make install; \
+fi
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install libtool \
         && cd /protobuf-3.20.1 \
