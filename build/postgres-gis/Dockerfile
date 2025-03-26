@@ -58,7 +58,7 @@ ADD build/postgres-gis/protobuf-c-1.4.1.tar.gz /
 ADD build/postgres-gis/protobuf-3.20.1.tar.gz /
 
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
-	microdnf install -y findutils; \
+	${PACKAGER} install -y findutils; \
 fi
 
 
@@ -91,6 +91,8 @@ fi
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install which libtool libxml2-devel redhat-rpm-config clang llvm; \
 fi
+
+ENV LD_LIBRARY_PATH="/usr/local/ivorysql/ivorysql-4.4/lib:$LD_LIBRARY_PATH"
 
 ADD build/postgres-gis/postgis-3.4.0.tar.gz /
 RUN cd postgis-3.4.0 \
