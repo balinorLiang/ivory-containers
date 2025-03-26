@@ -64,7 +64,7 @@ fi
 
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	cd geos-3.9.2 \
-	&& ./configure --prefix=/usr/local/geos-3.9.2 \
+	&& ./configure --prefix=/usr/local/geos-3.9.2 --with-pgconfig=/usr/local/ivorysql/ivorysql-4/pg_config \
 	&& make && make install; \
 fi
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
