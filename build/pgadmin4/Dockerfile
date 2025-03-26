@@ -89,6 +89,9 @@ RUN sed -i 's/config.CONFIG_DATABASE_CONNECTION_POOL_SIZE/5/g' /usr/lib/python3.
     sed -i 's/config.CONFIG_DATABASE_CONNECTION_MAX_OVERFLOW/100/g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/model/__init__.py && \
     sed -i 's/import config//g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/model/__init__.py
 
+RUN sed -i 's/config.SHARED_STORAGE/[]/g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/utils/__init__.py && \
+    sed -i "s|config.STORAGE_DIR|'/var/lib/pgadmin/storage'|g" /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/utils/__init__.py && \
+    sed -i 's/import config//g' /usr/lib/python3.9/site-packages/pgadmin4-web/pgadmin/utils/__init__.py
 
 RUN ${PACKAGER} -y install --nodocs \
                 mod_ssl \
