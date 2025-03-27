@@ -150,9 +150,7 @@ ADD bin/common /opt/crunchy/bin
 ADD conf/postgres_common /opt/crunchy/conf
 ADD tools/pgmonitor/postgres_exporter/common /opt/crunchy/bin/modules/pgexporter
 ADD tools/pgmonitor/postgres_exporter/linux /opt/crunchy/bin/modules/pgexporter
-ADD bin/v9_pgbackrest/pgbackrest /usr/bin
 
-ENV LD_LIBRARY_PATH="/usr/local/ivorysql/ivorysql-4.4/lib:${LD_LIBRARY_PATH}"
 RUN mkdir /.ssh && chown 998:0 /.ssh && chmod g+rwx /.ssh && rm -f /run/nologin
 
 # remove the default spool directory so that pgBackRest does not attempt to look there when
