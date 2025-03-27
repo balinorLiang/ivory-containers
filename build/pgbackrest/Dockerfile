@@ -87,7 +87,7 @@ RUN mkdir /.ssh && chown ivorysql:ivorysql /.ssh && chmod o+rwx /.ssh
 RUN rm -rf /var/spool/pgbackrest
 
 ADD bin/v9_pgbackrest/pgbackrest /usr/bin
-ENV LD_LIBRARY_PATH="/opt/ivorysql-4.4/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/opt/IvorySQL-4.4/lib:${LD_LIBRARY_PATH}"
 # create necessary volumes for all modes
 #
 # /sshd and /backrestrepo required for the pgBackRest repo mode
