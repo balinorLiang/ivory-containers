@@ -22,6 +22,8 @@ LABEL name="pgbackrest" \
 	io.k8s.display-name="Crunchy pgBackRest" \
 	io.openshift.tags="postgresql,postgres,pgbackrest,backup,database,crunchy"
 
+RUN wget https://github.com/IvorySQL/IvorySQL/releases/download/IvorySQL_4.4/IvorySQL-4.4-a50789d-20250304.x86_64.rpm
+RUN rpm -ivh IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 # Run postgres install in separate transaction ahead of backrest for postgres user
 RUN if [ "$BASEOS" = "ubi8" ] ; then \
 	${PACKAGER} -y install --nodocs --enablerepo="epel" \
@@ -84,6 +86,8 @@ RUN mkdir /.ssh && chown ivorysql:ivorysql /.ssh && chmod o+rwx /.ssh
 # performing a restore (pgBackRest will not have permissions to access to this dir in all envs)
 RUN rm -rf /var/spool/pgbackrest
 
+ADD bin/v9_pgbackrest/pgbackrest /usr/bin
+ENV LD_LIBRARY_PATH="/opt/ivorysql-4.4/lib:${LD_LIBRARY_PATH}"
 # create necessary volumes for all modes
 #
 # /sshd and /backrestrepo required for the pgBackRest repo mode
