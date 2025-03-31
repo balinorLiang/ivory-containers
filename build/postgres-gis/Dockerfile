@@ -93,6 +93,7 @@ RUN if [ "$BASEOS" = "ubi8" ] ; then \
 fi
 
 ENV LD_LIBRARY_PATH="/usr/lib64:/usr/local/geos-3.9.2/lib:/usr/local/ivorysql/ivorysql-4.4/lib:$LD_LIBRARY_PATH"
+RUN cp /usr/lib64/libstdc++.so.6 /usr/local/ivorysql/ivorysql-4.4/lib
 
 ADD build/postgres-gis/postgis-3.4.0.tar.gz /
 RUN cd postgis-3.4.0 \
