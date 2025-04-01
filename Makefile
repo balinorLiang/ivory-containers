@@ -69,7 +69,7 @@ images = ivorysql-ivorysql \
 all: ivyimages pg-independent-images pgbackrest-images
 
 # Build images that either don't have a PG dependency or using the latest PG version is all that is needed
-pg-independent-images: pgbouncer pgadmin4
+pg-independent-images: pgbouncer pgadmin4 pgexporter
 
 # Build images that require a specific postgres version - ordered for potential concurrent benefits
 ivyimages: ivorysql ivorysql-postgis
