@@ -43,13 +43,13 @@ RUN cd pg_cron-1.6.5 \
         && make install USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
         && rm -rf ../pg_cron-1.6.5
 # install timescaledb
-#ADD resource/timescaledb-2.17.2.tar.gz /
-#RUN cd timescaledb-2.17.2 \
-#        && ./bootstrap \
-#        && cd build \
-#        && make PG_CONFIG=$IVYROOT/bin/pg_config \
-#        && make install PG_CONFIG=$IVYROOT/bin/pg_config \
-#	&& rm -rf ../timescaledb-2.17.2
+ADD resource/timescaledb-2.17.2-ivy-4.4.tar.gz /
+RUN cd ivory-tsdb \
+        && ./bootstrap \
+        && cd build \
+        && make PG_CONFIG=$IVYROOT/bin/pg_config \
+        && make install PG_CONFIG=$IVYROOT/bin/pg_config \
+	&& rm -rf ../timescaledb-2.17.2
 # install wal2json
 ADD resource/wal2json-wal2json_2_6.tar.gz /
 RUN cd wal2json-wal2json_2_6 \
