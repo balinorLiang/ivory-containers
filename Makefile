@@ -9,7 +9,7 @@ BASE_IMAGE_OS ?= $(CCP_BASEOS)
 CCP_IMAGE_PREFIX ?= ivorysql
 CCP_PGVERSION ?= 17
 CCP_PG_FULLVERSION ?= 17.4
-CCP_IVYVERSION ?= 4
+CCP_IVYVERSION ?= 4.4
 CCP_IVY_FULLVERSION ?= 4.4
 CCP_PATRONI_VERSION ?= 4.0.4
 CCP_BACKREST_VERSION ?= 2.54.1
@@ -86,7 +86,7 @@ pgexporter: pgexporter-img-$(IMGBUILDER)
 pgbackrest: pgbackrest-ivyimg-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
 ivorysql: ivorysql-ivyimg-$(IMGBUILDER)
-postgres-gis: postgres-gis-ivyimg-$(IMGBUILDER)
+ivorysql-gis: ivorysql-gis-ivyimg-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
@@ -181,7 +181,7 @@ endif
 
 # ----- Special case pg-based image (postgres-gis) -----
 # Special case args: POSTGIS_LBL
-postgres-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postgres-gis/Dockerfile
+ivorysql-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postgres-gis/Dockerfile
 	$(IMGCMDSTEM) \
 		--network=host \
 		-f $(CCPROOT)/build/postgres-gis/Dockerfile \
@@ -195,13 +195,13 @@ postgres-gis-ivyimg-build: postgres-gis-base-ivyimg-build $(CCPROOT)/build/postg
 		--build-arg IVYO_VER=$(CCP_IVYO_VERSION) \
 		$(CCPROOT)
 
-postgres-gis-ivyimg-buildah: postgres-gis-ivyimg-build ;
+ivorysql-gis-ivyimg-buildah: ivorysql-gis-ivyimg-build ;
 # only push to docker daemon if variable IMG_PUSH_TO_DOCKER_DAEMON is set to "true"
 ifeq ("$(IMG_PUSH_TO_DOCKER_DAEMON)", "true")
 	sudo --preserve-env buildah push $(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG) docker-daemon:$(CCP_IMAGE_PREFIX)/ivorysql-postgres-gis:$(CCP_POSTGIS_IMAGE_TAG)
 endif
 
-postgres-gis-ivyimg-docker: postgres-gis-ivyimg-build
+ivorysql-gis-ivyimg-docker: ivorysql-gis-ivyimg-build
 
 # ----- Special case image (pgbackrest) -----
 
