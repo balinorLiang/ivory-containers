@@ -18,6 +18,6 @@ NSS_WRAPPER_DIR="/tmp/nss_wrapper/${NSS_WRAPPER_SUBDIR}"
 NSS_WRAPPER_PASSWD="${NSS_WRAPPER_DIR}/passwd"
 NSS_WRAPPER_GROUP="${NSS_WRAPPER_DIR}/group"
 
-export LD_PRELOAD=/usr/lib64/libnss_wrapper.so
+export LD_PRELOAD=/usr/lib64/libnss_wrapper.so:/lib64/libssl.so.1.1:/lib64/libcrypto.so.1.1
 export NSS_WRAPPER_PASSWD="${NSS_WRAPPER_PASSWD}"
 export NSS_WRAPPER_GROUP="${NSS_WRAPPER_GROUP}"
