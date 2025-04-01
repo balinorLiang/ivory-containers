@@ -86,7 +86,7 @@ pgexporter: pgexporter-img-$(IMGBUILDER)
 pgbackrest: pgbackrest-ivyimg-$(IMGBUILDER)
 pgbouncer: pgbouncer-img-$(IMGBUILDER)
 ivorysql: ivorysql-ivyimg-$(IMGBUILDER)
-ivorysql-gis: ivorysql-gis-ivyimg-$(IMGBUILDER)
+ivorysql-postgis: ivorysql-gis-ivyimg-$(IMGBUILDER)
 
 #===========================================
 # Pattern-based image generation targets
