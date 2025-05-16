@@ -50,7 +50,7 @@ RUN cd pg_cron-1.6.5 \
         && make install USE_PGXS=1 PG_CONFIG=$IVYROOT/bin/pg_config \
         && rm -rf ../pg_cron-1.6.5
 # install timescaledb
-ADD resource/timescaledb-2.17.2-ivy-4.4.tar.gz /
+ADD resource/timescaledb-2.17.2.tar.gz /
 RUN cd ivory-tsdb \
         && ./bootstrap \
         && cd build \
