@@ -4,7 +4,7 @@ ARG PG_FULL
 ARG IVY_FULL
 ARG PREFIX
 ARG BASE_IMAGE_NAME
-ARG IVYO_VER 
+ARG IVYO_VER
 FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER} as step1
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
@@ -17,25 +17,49 @@ ARG PG_MAJOR
 ARG IVY_MAJOR
 
 RUN  ${PACKAGER} -y install \
-	redhat-rpm-config \
-	openssl-devel \
-	make \
-	&& ${PACKAGER} -y clean all
+        redhat-rpm-config \
+        openssl-devel \
+        make \
+        && ${PACKAGER} -y clean all
 RUN ${PACKAGER} install -y libxslt tcl
 RUN ${PACKAGER} install -y lz4 libicu libxslt python3 wget git
 #RUN wget https://github.com/IvorySQL/IvorySQL/releases/download/IvorySQL_4.4/IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 #RUN rpm -ivh IvorySQL-4.4-a50789d-20250304.x86_64.rpm
 
-RUN ${PACKAGER} install -y gcc
-RUN ${PACKAGER} install -y bison readline-devel zlib-devel openssl-devel
-RUN ${PACKAGER} groupinstall -y 'Development Tools'
+RUN ${PACKAGER} install -y gcc m4 ncurses-devel
+RUN rpm -ivh https://repo.almalinux.org/almalinux/8/AppStream/x86_64/os/Packages/bison-3.0.4-10.el8.x86_64.rpm
+RUN rpm -ivh https://repo.almalinux.org/almalinux/8/BaseOS/x86_64/os/Packages/readline-devel-7.0-10.el8.x86_64.rpm
 
-RUN git clone -b IVORY_REL_4_STABLE --depth 1 https://github.com/IvorySQL/IvorySQL.git
-RUN cd IvorySQL
-RUN ./configure --prefix=/opt/ivorysql-4
-RUN make && make install
+RUN ${PACKAGER} install -y zlib-devel openssl-devel
+RUN ${PACKAGER} install -y gcc gcc-c++ make automake autoconf
 
-ENV IVYROOT="/opt/IvorySQL-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
+RUN git clone -b IVORY_REL_4_STABLE https://github.com/IvorySQL/IvorySQL.git
+RUN curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-8.repo; \
+    sed -i -e '/mirrors.cloud.aliyuncs.com/d' -e '/mirrors.aliyuncs.com/d' /etc/yum.repos.d/CentOS-Base.repo
+RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm; \
+    dnf install -y epel-release;
+RUN dnf install -y \
+    flex \
+    readline-devel \
+    zlib-devel \
+    openssl-devel \
+    llvm-toolset llvm-devel lz4 lz4-devel lz4-libs clang-devel \
+    krb5-devel libselinux-devel libxml2-devel cyrus-sasl-gssapi \
+    libicu-devel e2fsprogs-devel selinux-policy systemd-devel \
+    libxslt-devel openldap-devel openssl-devel pam-devel \
+    libuuid-devel python3-devel readline-devel tcl-devel zlib-devel \
+    perl perl-devel perl-ExtUtils-Embed;\
+    dnf install -y --enablerepo=*ower*ools perl-IPC-Run perl-Time-HiRes perl-Test-Simple uuid-devel;
+
+RUN cd IvorySQL && ./configure --prefix=/opt/ivorysql-4 --with-openssl --enable-cassert --enable-debug --enable-rpath --with-tcl \
+            --with-python --with-gssapi --with-pam --with-ldap \
+            --with-openssl --with-libedit-preferred --with-uuid=e2fs \
+            --with-ossp-uuid  --with-libxml --with-libxslt  --with-perl \
+            --without-icu \
+            && make && make install
+RUN cd IvorySQL/contrib && make && make install
+
+ENV IVYROOT="/opt/ivorysql-4" IVYVERSION="4.5"
 ENV PATH="${IVYROOT}/bin:${PATH}"
 
 # insatll pgaudit
@@ -51,30 +75,30 @@ RUN cd pg_cron-1.6.5 \
         && rm -rf ../pg_cron-1.6.5
 # install timescaledb
 ADD resource/timescaledb-2.17.2.tar.gz /
-RUN cd ivory-tsdb \
+RUN cd timescaledb-2.17.2 \
         && ./bootstrap \
         && cd build \
         && make PG_CONFIG=$IVYROOT/bin/pg_config \
         && make install PG_CONFIG=$IVYROOT/bin/pg_config \
-	&& rm -rf ../timescaledb-2.17.2
+        && rm -rf ../timescaledb-2.17.2
 # install wal2json
 ADD resource/wal2json-wal2json_2_6.tar.gz /
 RUN cd wal2json-wal2json_2_6 \
-	&& export PATH=$IVYROOT/bin:$PATH \
-	&& make \
-	&& make install \
-	&& rm -rf ../wal2json-wal2json_2_6
+        && export PATH=$IVYROOT/bin:$PATH \
+        && make \
+        && make install \
+        && rm -rf ../wal2json-wal2json_2_6
 # install pgnodemx
 ADD resource/pgnodemx-1.7.tar.gz /
 RUN cd pgnodemx-1.7 \
-	&& make USE_PGXS=1 \
-	&& make USE_PGXS=1 install \
-	&& rm -rf ../pgnodemx-1.7
+        && make USE_PGXS=1 \
+        && make USE_PGXS=1 install \
+        && rm -rf ../pgnodemx-1.7
 
 ###########################################################################
 ###
 ###########################################################################
-FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER} 
+FROM ${BASE_IMAGE_NAME}:${BASEOS}-${IVY_FULL}-${IVYO_VER}-${BASEVER}
 
 # For RHEL8 all arguments used in main code has to be specified after FROM
 ARG PG_FULL
@@ -92,7 +116,7 @@ RUN ${PACKAGER} -y update epel-release \
         && rpm -ivh pgdg-redhat-repo-latest.noarch.rpm
 
 # Preserving PGVERSION out of paranoia
-ENV PGROOT="/usr/pgsql-${PG_MAJOR}" PGVERSION="${PG_MAJOR}" IVYROOT="/usr/local/ivorysql/ivorysql-${IVY_MAJOR}" IVYVERSION="${IVY_MAJOR}" 
+ENV PGROOT="/usr/pgsql-${PG_MAJOR}" PGVERSION="${PG_MAJOR}" IVYROOT="/usr/local/ivorysql/ivorysql-4" IVYVERSION="4.5"
 
 ARG PATRONI_VER
 ARG BACKREST_VER
@@ -102,10 +126,10 @@ RUN ${PACKAGER} -y install \
                 --enablerepo="epel" \
                 libicu \
                 libxslt \
-		tcl \
+                tcl \
                 openssh-clients \
                 openssh-server \
-		pgbackrest-${BACKREST_VER} \
+                pgbackrest-${BACKREST_VER} \
                 psmisc \
                 python3-pip \
                 python3-psutil \
@@ -117,15 +141,15 @@ RUN ${PACKAGER} -y install \
                 bzip2 \
                 lz4 \
                 krb5-workstation \
-        && ${PACKAGER} -y clean all 
+        && ${PACKAGER} -y clean all
 
 RUN cat /dev/null > /etc/pgbackrest.conf
 
-COPY --from=step1 /opt/IvorySQL-${IVY_MAJOR} /usr/local/ivorysql/ivorysql-${IVY_MAJOR}
+COPY --from=step1 /opt/ivorysql-4 /usr/local/ivorysql/ivorysql-4
 
 # install patroni for Kube
 RUN pip3 install --upgrade python-dateutil \
-	&& pip3 install patroni[kubernetes]=="${PATRONI_VER}"
+        && pip3 install patroni[kubernetes]=="${PATRONI_VER}"
 
 ENV PATH="${IVYROOT}/bin:${PATH}"
 LABEL name="ivory" \
