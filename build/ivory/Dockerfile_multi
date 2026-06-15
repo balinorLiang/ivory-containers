@@ -33,7 +33,7 @@ RUN rpm -ivh https://repo.almalinux.org/almalinux/9/AppStream/x86_64/os/Packages
 RUN ${PACKAGER} install -y zlib-devel openssl-devel
 RUN ${PACKAGER} install -y gcc gcc-c++ make automake autoconf
 
-ADD resource/IvorySQL-IVORY_REL_5_STABLE.zip /
+ADD resource/IvorySQL.tar /
 #RUN git clone -b IVORY_REL_5_STABLE https://github.com/IvorySQL/IvorySQL.git
 
 RUN echo "[centos-stream-9-baseos]" > /etc/yum.repos.d/centos-stream-9.repo && \
@@ -209,6 +209,7 @@ LABEL name="ivory" \
 RUN mkdir -p /opt/crunchy/bin /opt/crunchy/conf /pgdata /pgwal /pgconf /backrestrepo
 
 RUN useradd -u 998 ivorysql
+RUN mkdir -p /var/lib/pgsql
 RUN chown -R ivorysql:ivorysql /opt/crunchy /var/lib/pgsql \
                 /pgdata /pgwal /pgconf /backrestrepo &&  \
         chmod -R g=u /opt/crunchy /var/lib/pgsql \

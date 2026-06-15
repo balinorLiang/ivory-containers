@@ -5,9 +5,6 @@ ARG PACKAGER
 ARG PG_MAJOR
 ARG PGBOUNCER_VER
 
-RUN ${PACKAGER} -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm \
-	&& ${PACKAGER} -y makecache
-
 LABEL name="pgbouncer" \
 	summary="Lightweight connection pooler for ivory" \
 	description="The aim of pgbouncer is to lower the performance impact of opening new connections to PostgreSQL; clients connect through this service. It offers session, transaction and statement pooling." \
@@ -15,11 +12,25 @@ LABEL name="pgbouncer" \
 	io.k8s.display-name="pgBouncer" \
 	io.openshift.tags="postgresql,postgres,pooling,pgbouncer,database,ivory,ivorysql"
 
-RUN ${PACKAGER} -y install --nodocs \
-	--disablerepo="epel" \
-	pgbouncer-${PGBOUNCER_VER} \
-	&& ${PACKAGER} -y clean all
+RUN dnf install -y --allowerasing \
+    gcc make \
+    autoconf automake libtool m4 \
+    libevent-devel openssl-devel \
+    pkgconf-pkg-config \
+    curl git
 
+RUN curl -L -o pgbouncer.tar.gz \
+    https://github.com/pgbouncer/pgbouncer/archive/refs/tags/pgbouncer_1_25_2.tar.gz
+
+RUN tar xf pgbouncer.tar.gz
+
+RUN cd pgbouncer-pgbouncer_1_25_2 && \
+    ./autogen.sh && \
+    ./configure && \
+    sed -i 's|^SUBDIRS = .*|SUBDIRS = src|' Makefile && \
+    sed -i '/pgbouncer\.1/d' Makefile && \
+    make -j$(nproc) && \
+    make install
 # Preserving PGVERSION out of paranoia
 ENV PGVERSION="${PG_MAJOR}"
 

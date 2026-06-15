@@ -149,7 +149,7 @@ RUN if [ "$BASEOS" = "centos8" ] ; then \
 	${PACKAGER} install -y libxml2 json-c geos protobuf protobuf-c libtiff  && ${PACKAGER} -y clean all ; \
 fi
 RUN if [ "$BASEOS" = "ubi9" ] ; then \
-        ${PACKAGER} install -y geos311 libtiff  && ${PACKAGER} -y clean all ; \
+        ${PACKAGER} install -y geos libtiff  && ${PACKAGER} -y clean all ; \
 fi
 RUN rm -rf /usr/local/ivorysql/ivorysql-5
 COPY --from=step1 /usr/local/proj-8.2.1/lib/*.so /usr/local/proj-8.2.1/lib/
