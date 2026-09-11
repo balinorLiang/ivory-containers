@@ -33,8 +33,8 @@ RUN rpm -ivh https://repo.almalinux.org/almalinux/9/AppStream/x86_64/os/Packages
 RUN ${PACKAGER} install -y zlib-devel openssl-devel
 RUN ${PACKAGER} install -y gcc gcc-c++ make automake autoconf
 
-ADD resource/IvorySQL.tar /
-#RUN git clone -b IVORY_REL_5_STABLE https://github.com/IvorySQL/IvorySQL.git
+#ADD resource/IvorySQL.tar /
+RUN git clone -b IVORY_REL_5_STABLE https://github.com/IvorySQL/IvorySQL.git
 
 RUN echo "[centos-stream-9-baseos]" > /etc/yum.repos.d/centos-stream-9.repo && \
     echo "name=CentOS Stream 9 BaseOS - AliYun" >> /etc/yum.repos.d/centos-stream-9.repo && \
